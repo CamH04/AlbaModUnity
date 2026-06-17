@@ -15,6 +15,7 @@ public class Abilities : MonoBehaviour {
     public float maxGrappleSpeed = 35f;
     public float launchUpward = 4f;
     public LayerMask grappleMask;
+    public Vector3 GrapplePoint => _grapplePoint;
 
     [Header("Swing Settings")]
     public bool swingMode = true;
