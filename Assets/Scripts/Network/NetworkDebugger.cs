@@ -22,5 +22,6 @@ public class NetworkDebugger : MonoBehaviour {
         NetworkManager.Singleton.SceneManager.OnSceneEvent += (e) => {
             Debug.Log($"SCENE EVENT: {e.SceneEventType} | Scene: {e.SceneName} | Client: {e.ClientId}");
         };
+
     }
 }

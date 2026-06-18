@@ -39,18 +39,39 @@ public class NetworkPlayerSync : NetworkBehaviour {
 
     public override void OnNetworkSpawn() {
         if (!IsOwner) {
-            // Disable all local input/physics on remote players
-            GetComponent<PlayerController>().enabled = false;
-            GetComponent<PlayerMotor>().enabled = false;
-            _cc.enabled = false;
+            // Disable input and physics for remote players
+            var pc = GetComponent<PlayerController>();
+            if (pc != null) pc.enabled = false;
 
-            // Disable camera on remote player
+            var motor = GetComponent<PlayerMotor>();
+            if (motor != null) motor.enabled = false;
+
+            // DON'T disable CharacterController — disabling it on spawn breaks NGO
+            // Just set it to non-interactive instead
+            var cc = GetComponent<CharacterController>();
+            if (cc != null) cc.detectCollisions = false;
+
+            // Disable camera for remote players
             var cam = GetComponentInChildren<Camera>();
             if (cam != null) cam.gameObject.SetActive(false);
 
-            // Listen for state changes to drive visuals
-            _netWallRun.OnValueChanged += (_, val) => { /* drive animator here */ };
-            _netGrappling.OnValueChanged += OnGrappleChanged;
+            // Disable audio listener on remote player to fix the 3 audio listeners warning
+            var listener = GetComponentInChildren<AudioListener>();
+            if (listener != null) listener.enabled = false;
+        }
+        else {
+            // Local owner — lock cursor only in game scene
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Game") {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+
+            // Disable audio listeners on non-local cameras to fix the warning
+            var listeners = FindObjectsOfType<AudioListener>();
+            foreach (var l in listeners) {
+                if (l.gameObject != gameObject && !l.GetComponentInParent<NetworkObject>()?.IsOwner == true)
+                    l.enabled = false;
+            }
         }
     }
 

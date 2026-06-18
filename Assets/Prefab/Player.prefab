@@ -217,12 +217,10 @@ GameObject:
   - component: {fileID: 684744116623913359}
   - component: {fileID: 8753623717581365268}
   - component: {fileID: 8884102682382835454}
-  - component: {fileID: 8264020469095523093}
   - component: {fileID: 5942764689307624864}
   - component: {fileID: 4529592476133090014}
   - component: {fileID: 2331461148072650049}
   - component: {fileID: 2616399451006579577}
-  - component: {fileID: 7585223908143761266}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -438,18 +436,6 @@ MonoBehaviour:
   standHeight: 2
   crouchHeight: 1
   crouchSpeed: 10
---- !u!114 &8264020469095523093
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5994856343534761650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f973b8cfb78f2814ba5d22f523c53ebc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5942764689307624864
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -628,28 +614,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2174894560
+  GlobalObjectIdHash: 2791974845
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
+  ActiveSceneSynchronization: 1
+  SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &7585223908143761266
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5994856343534761650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe2bec1827262a64e976882f6d409eb2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

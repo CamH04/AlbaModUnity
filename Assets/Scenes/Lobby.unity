@@ -379,7 +379,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &74544957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1035,7 +1035,6 @@ GameObject:
   - component: {fileID: 388400787}
   - component: {fileID: 388400786}
   - component: {fileID: 388400785}
-  - component: {fileID: 388400788}
   - component: {fileID: 388400789}
   m_Layer: 0
   m_Name: NetworkManager
@@ -1089,7 +1088,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 388400785}
-    PlayerPrefab: {fileID: 0}
+    PlayerPrefab: {fileID: 5994856343534761650, guid: 2ffc15784b59fda439b80c108c9bad36, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: 7cc23013ab022204bba598586fb5b997, type: 2}
@@ -1130,20 +1129,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &388400788
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 388400784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b69c68c3583dc342a2c95a1194114d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 5994856343534761650, guid: 2ffc15784b59fda439b80c108c9bad36, type: 3}
-  gameSceneName: Game
 --- !u!114 &388400789
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3057,6 +3042,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lobbySceneName: Lobby
   gameSceneName: Game
+  playerPrefab: {fileID: 5994856343534761650, guid: 2ffc15784b59fda439b80c108c9bad36, type: 3}
 --- !u!114 &1681395781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3474,6 +3460,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lobbySceneName: Lobby
   gameSceneName: Game
+  playerPrefab: {fileID: 0}
 --- !u!4 &2012019933
 Transform:
   m_ObjectHideFlags: 0

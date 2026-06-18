@@ -22,7 +22,6 @@
 + Settings 
 + Leveling Feature With Profile
 + Chat
-+ Multiplayer
 =============Then Playtest=============
 + Weapon inspects
 + Achivments 
@@ -30,6 +29,7 @@
 
 
 # Done
++ Multiplayer
 + Grapple Hook
 + Stim
 + Wallriding (with double jump)

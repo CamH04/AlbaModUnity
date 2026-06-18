@@ -56,8 +56,26 @@ public class PlayerController : MonoBehaviour {
                 : playerCamera.transform;
         if (orientation == null) orientation = transform;
 
+        // Don't touch cursor here
+    }
+    void OnEnable() {
+        // Only lock cursor if we're in the game scene, not the lobby
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Game")
+            LockCursor();
+    }
+
+    void OnDisable() {
+        UnlockCursor();
+    }
+
+    void LockCursor() {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    void UnlockCursor() {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     void OnSlidePressed() {
