@@ -42,6 +42,9 @@ public class NetworkBootstrapper : MonoBehaviour {
     public async void StartClient(string lobbyId) {
         bool joined = await LobbyManager.Instance.JoinLobbyById(lobbyId);
         if (!joined) return;
+
+        NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
+
         NetworkManager.Singleton.StartClient();
         Debug.Log("Client started");
     }
