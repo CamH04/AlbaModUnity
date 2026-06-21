@@ -2,6 +2,8 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class NetworkBootstrapper : MonoBehaviour {
     public static NetworkBootstrapper Instance;
@@ -13,8 +15,10 @@ public class NetworkBootstrapper : MonoBehaviour {
     [Header("Prefabs")]
     public GameObject playerPrefab;
 
-    // Holds pending approvals until game scene is ready
-    private bool _gameSceneReady = false;
+    [Header("Spawn Points")]
+    public string spawnPointTag = "SpawnPoint"; // Tag your spawn point objects with this
+
+    private Transform[] _spawnPoints;
 
     void Awake() {
         if (Instance == null) {
@@ -31,7 +35,6 @@ public class NetworkBootstrapper : MonoBehaviour {
     public async void StartHost(string lobbyName) {
         await LobbyManager.Instance.CreateLobby(lobbyName);
 
-        // Enable connection approval so we control when players spawn
         NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
         NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
 
@@ -54,22 +57,45 @@ public class NetworkBootstrapper : MonoBehaviour {
         bool inGameScene = SceneManager.GetActiveScene().name == gameSceneName;
 
         response.Approved = true;
-        response.CreatePlayerObject = inGameScene; // Only create player if in game scene
+        response.CreatePlayerObject = inGameScene;
         response.PlayerPrefabHash = null;
         response.Pending = false;
 
         if (inGameScene) {
-            response.Position = GetSpawnPosition();
+            response.Position = GetSpawnPosition(request.ClientNetworkId);
             response.Rotation = Quaternion.identity;
         }
 
         Debug.Log($"Client {request.ClientNetworkId} approved | inGameScene: {inGameScene} | createPlayer: {inGameScene}");
     }
 
-    Vector3 GetSpawnPosition() {
-        // Find a SpawnPoint tagged object if one exists, otherwise default
-        GameObject spawnPoint = GameObject.FindGameObjectWithTag("SpawnPoint");
-        return spawnPoint != null ? spawnPoint.transform.position : new Vector3(0, 2, 0);
+    // Look up spawn points fresh from the currently loaded scene
+    void RefreshSpawnPoints() {
+        GameObject[] tagged = GameObject.FindGameObjectsWithTag(spawnPointTag);
+
+        // Sort by name so SpawnPoint_1, SpawnPoint_2 etc come back in consistent order
+        _spawnPoints = tagged
+            .OrderBy(go => go.name)
+            .Select(go => go.transform)
+            .ToArray();
+
+        Debug.Log($"Found {_spawnPoints.Length} spawn points in scene");
+    }
+
+    Vector3 GetSpawnPosition(ulong clientId) {
+        if (_spawnPoints == null || _spawnPoints.Length == 0)
+            RefreshSpawnPoints();
+
+        Debug.Log($"GetSpawnPosition called for clientId={clientId} | spawnPoints.Length={_spawnPoints?.Length ?? 0}");
+
+        if (_spawnPoints != null && _spawnPoints.Length > 0) {
+            int index = (int)(clientId % (ulong)_spawnPoints.Length);
+            Debug.Log($"clientId={clientId} ? index={index} ? position={_spawnPoints[index].position}");
+            return _spawnPoints[index].position;
+        }
+
+        Debug.LogWarning("No spawn points found in scene — using fallback position");
+        return new Vector3(clientId * 3f, 4, 0);
     }
 
     public void LoadGameScene() {
@@ -78,7 +104,6 @@ public class NetworkBootstrapper : MonoBehaviour {
             return;
         }
 
-        // Subscribe to scene load so we can spawn players after scene is ready
         NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
         NetworkManager.Singleton.SceneManager.LoadScene(gameSceneName, LoadSceneMode.Single);
     }
@@ -90,22 +115,23 @@ public class NetworkBootstrapper : MonoBehaviour {
         SceneManager.LoadScene(lobbySceneName);
     }
 
-
     private bool _spawningInProgress = false;
 
     void OnGameSceneLoaded(string sceneName, LoadSceneMode mode,
-        System.Collections.Generic.List<ulong> clientsCompleted,
-        System.Collections.Generic.List<ulong> clientsTimedOut) {
+        List<ulong> clientsCompleted,
+        List<ulong> clientsTimedOut) {
         if (sceneName != gameSceneName) return;
-        if (_spawningInProgress) return; // prevent double spawn
+        if (_spawningInProgress) return;
         NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
+
+        RefreshSpawnPoints(); // grab spawn points now that Game scene is active
+
         Debug.Log("Game scene loaded — scheduling player spawn next frame");
         _spawningInProgress = true;
         StartCoroutine(SpawnPlayersNextFrame());
     }
 
     IEnumerator SpawnPlayersNextFrame() {
-        // Wait two frames for NGO to fully finish its internal scene sync
         yield return null;
         yield return null;
 
@@ -114,7 +140,7 @@ public class NetworkBootstrapper : MonoBehaviour {
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds) {
             try {
                 var playerInstance = Instantiate(playerPrefab);
-                playerInstance.transform.position = GetSpawnPosition();
+                playerInstance.transform.position = GetSpawnPosition(clientId);
                 playerInstance.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
                 Debug.Log($"Spawned player for client {clientId} at {playerInstance.transform.position}");
                 StartCoroutine(CheckPlayerSurvived(playerInstance, clientId));
@@ -133,4 +159,6 @@ public class NetworkBootstrapper : MonoBehaviour {
         else
             Debug.Log($"Player survived — pos: {player.transform.position} | active: {player.activeSelf}");
     }
+
+
 }

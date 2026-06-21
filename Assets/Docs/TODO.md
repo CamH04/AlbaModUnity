@@ -1,3 +1,7 @@
+# To Fix
++ Multiplayer working lol
++ Can counteract grapplehook by holding S
+
 # To Add
 
 + Guns
@@ -12,7 +16,7 @@
 + Maps
 + + Titanfall 2 type 1v1 map
 + + Penshaw monument map (with worm killbox) 
-+ + Castle Ruins
++ + Castle Ruins / Chapel
 
 + Main Menu
 + Playlist 

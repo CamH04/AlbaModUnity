@@ -38,10 +38,11 @@ public class NetworkPlayerSync : NetworkBehaviour {
     }
 
     public override void OnNetworkSpawn() {
+        Debug.Log($"OnNetworkSpawn — IsOwner: {IsOwner} | OwnerClientId: {OwnerClientId} | LocalClientId: {NetworkManager.Singleton.LocalClientId}");
         if (!IsOwner) {
-            // Disable input and physics for remote players
             var pc = GetComponent<PlayerController>();
             if (pc != null) pc.enabled = false;
+            Debug.Log($"Disabled PlayerController for non-owner (owner={OwnerClientId})");
 
             var motor = GetComponent<PlayerMotor>();
             if (motor != null) motor.enabled = false;
@@ -76,6 +77,7 @@ public class NetworkPlayerSync : NetworkBehaviour {
     }
 
     void Update() {
+        if (!IsOwner) return;
         if (IsOwner)
             SendState();
         else
