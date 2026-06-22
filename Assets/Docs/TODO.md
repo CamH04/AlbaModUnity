@@ -1,5 +1,6 @@
 # To Fix
-+ Multiplayer working lol
++ host cant interact with anything and doesnt drop to the floor (i spawn them in the air). the host doesnt see the client move around either, the client works fine though
++ Abilites need to be network objects
 + Can counteract grapplehook by holding S
 
 # To Add

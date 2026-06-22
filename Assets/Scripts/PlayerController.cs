@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
 [RequireComponent(typeof(PlayerMotor))]
 [RequireComponent(typeof(WallRunController))]
 [RequireComponent(typeof(SlideController))]
-public class PlayerController : MonoBehaviour {
+public class PlayerController : NetworkBehaviour{
     [Header("References")]
     public Transform orientation;
     public Transform cameraHolder;
@@ -59,13 +60,14 @@ public class PlayerController : MonoBehaviour {
         // Don't touch cursor here
     }
     void OnEnable() {
-        // Only lock cursor if we're in the game scene, not the lobby
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Game")
+        // Only lock cursor if we own this player and we're in the game scene
+        if (IsOwner && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Game")
             LockCursor();
     }
 
     void OnDisable() {
-        UnlockCursor();
+        if (IsOwner)
+            UnlockCursor();
     }
 
     void LockCursor() {
@@ -88,6 +90,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update() {
+        if (!IsOwner) return;
         Keyboard kb = Keyboard.current;
         Mouse mouse = Mouse.current;
         if (kb == null || mouse == null) return;
@@ -112,6 +115,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        if (!IsOwner) return;
         float hSpeed = new Vector3(_motor.Velocity.x, 0, _motor.Velocity.z).magnitude;
         if (_wallRun.JustStoppedWallRun) {
             _motor.GrantDoubleJump();
@@ -153,6 +157,7 @@ public class PlayerController : MonoBehaviour {
         _motor.Move(_moveInput, _jumpHeld);
     }
     void LateUpdate() {
+        if (!IsOwner) return;
         float targetTilt = 0f;
 
         if (_wallRun.IsWallRunning) {
