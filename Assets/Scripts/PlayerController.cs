@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using Unity.Netcode;
 
 [RequireComponent(typeof(PlayerMotor))]
@@ -42,6 +43,7 @@ public class PlayerController : NetworkBehaviour{
     private float _pitch;
     private float _currentTilt;
 
+    private bool _isOwned = false;
     void Awake() {
         _motor = GetComponent<PlayerMotor>();
         _wallRun = GetComponent<WallRunController>();
@@ -59,14 +61,39 @@ public class PlayerController : NetworkBehaviour{
 
         // Don't touch cursor here
     }
+    public override void OnNetworkSpawn() {
+        _isOwned = IsOwner;
+
+        Debug.Log($"[{gameObject.name}] OnNetworkSpawn — IsOwner:{IsOwner} OwnerClientId:{OwnerClientId} LocalClient:{NetworkManager.Singleton.LocalClientId}");
+
+        if (!IsOwner) {
+            // Disable all cameras on remote players
+            foreach (var cam in GetComponentsInChildren<Camera>(true)) {
+                cam.gameObject.SetActive(false);
+                Debug.Log($"Disabled camera {cam.gameObject.name} on non-owner player (owner={OwnerClientId})");
+            }
+
+            // Disable audio listeners on remote players
+            foreach (var listener in GetComponentsInChildren<AudioListener>(true))
+                listener.enabled = false;
+        }
+        else {
+            // Lock cursor for local owner
+            if (SceneManager.GetActiveScene().name == "Game") {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+
+            // Disable the FallbackCamera if it exists
+            var fallback = GameObject.Find("FallbackCamera");
+            if (fallback != null) fallback.SetActive(false);
+        }
+    }
     void OnEnable() {
-        // Only lock cursor if we own this player and we're in the game scene
-        if (IsOwner && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Game")
-            LockCursor();
     }
 
     void OnDisable() {
-        if (IsOwner)
+        if (_isOwned)
             UnlockCursor();
     }
 
@@ -90,7 +117,7 @@ public class PlayerController : NetworkBehaviour{
     }
 
     void Update() {
-        if (!IsOwner) return;
+        if (!_isOwned) return;
         Keyboard kb = Keyboard.current;
         Mouse mouse = Mouse.current;
         if (kb == null || mouse == null) return;
@@ -115,7 +142,7 @@ public class PlayerController : NetworkBehaviour{
     }
 
     void FixedUpdate() {
-        if (!IsOwner) return;
+        if (!_isOwned) return;
         float hSpeed = new Vector3(_motor.Velocity.x, 0, _motor.Velocity.z).magnitude;
         if (_wallRun.JustStoppedWallRun) {
             _motor.GrantDoubleJump();
@@ -157,7 +184,7 @@ public class PlayerController : NetworkBehaviour{
         _motor.Move(_moveInput, _jumpHeld);
     }
     void LateUpdate() {
-        if (!IsOwner) return;
+        if (!_isOwned) return;
         float targetTilt = 0f;
 
         if (_wallRun.IsWallRunning) {

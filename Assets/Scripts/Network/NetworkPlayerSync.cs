@@ -39,45 +39,41 @@ public class NetworkPlayerSync : NetworkBehaviour {
 
     public override void OnNetworkSpawn() {
         Debug.Log($"OnNetworkSpawn — IsOwner: {IsOwner} | OwnerClientId: {OwnerClientId} | LocalClientId: {NetworkManager.Singleton.LocalClientId}");
+
         if (!IsOwner) {
             var pc = GetComponent<PlayerController>();
             if (pc != null) pc.enabled = false;
-            Debug.Log($"Disabled PlayerController for non-owner (owner={OwnerClientId})");
 
             var motor = GetComponent<PlayerMotor>();
             if (motor != null) motor.enabled = false;
 
-            // DON'T disable CharacterController — disabling it on spawn breaks NGO
-            // Just set it to non-interactive instead
             var cc = GetComponent<CharacterController>();
             if (cc != null) cc.detectCollisions = false;
 
-            // Disable camera for remote players
-            var cam = GetComponentInChildren<Camera>();
-            if (cam != null) cam.gameObject.SetActive(false);
+            // Disable ALL cameras on remote players, not just the first
+            foreach (var cam in GetComponentsInChildren<Camera>(true))
+                cam.gameObject.SetActive(false);
 
-            // Disable audio listener on remote player to fix the 3 audio listeners warning
-            var listener = GetComponentInChildren<AudioListener>();
-            if (listener != null) listener.enabled = false;
+            // Disable ALL audio listeners on remote players
+            foreach (var listener in GetComponentsInChildren<AudioListener>(true))
+                listener.enabled = false;
         }
         else {
-            // Local owner — lock cursor only in game scene
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Game") {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
 
-            // Disable audio listeners on non-local cameras to fix the warning
-            var listeners = FindObjectsOfType<AudioListener>();
-            foreach (var l in listeners) {
-                if (l.gameObject != gameObject && !l.GetComponentInParent<NetworkObject>()?.IsOwner == true)
-                    l.enabled = false;
+            // Disable audio listeners on all other spawned players
+            foreach (var other in FindObjectsOfType<NetworkPlayerSync>()) {
+                if (other == this) continue;
+                foreach (var listener in other.GetComponentsInChildren<AudioListener>(true))
+                    listener.enabled = false;
             }
         }
     }
 
     void Update() {
-        if (!IsOwner) return;
         if (IsOwner)
             SendState();
         else
