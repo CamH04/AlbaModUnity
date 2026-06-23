@@ -1,5 +1,5 @@
 # To Fix
-+ host cant interact with anything and doesnt drop to the floor (i spawn them in the air). the host doesnt see the client move around either, the client works fine though
++ host cant interact with anything and doesnt drop to the floor (i spawn them in the air). the host doesnt see the client move around either, the client works fine though. when only the host is in a lobby it works fine.
 + Abilites need to be network objects
 + Can counteract grapplehook by holding S
 
@@ -12,7 +12,7 @@
 + + SMG (vector) 
 + + Throwing Knife 1 shot body
 + + lightbulb (flashbang) 
-+ + Kirkhammer 
++ + Half Satoichi 
 
 + Maps
 + + Titanfall 2 type 1v1 map
