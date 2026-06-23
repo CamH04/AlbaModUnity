@@ -1,9 +1,14 @@
-# To Fix
-+ host cant interact with anything and doesnt drop to the floor (i spawn them in the air). the host doesnt see the client move around either, the client works fine though. when only the host is in a lobby it works fine.
-+ Abilites need to be network objects
-+ Can counteract grapplehook by holding S
+# Known Bugs
++ Multiplayer: Host spawn point bugged (0.353560001,0.0799999237,-12.4499998)
++ Multiplayer: Abilites need to be network objects
++ Abilites: Can counteract grapplehook by holding S
++ Maps: Shit collision on chapel roof
 
 # To Add
++ Damage System
++ Guns
++ Killfeed
++ Respawn
 
 + Guns
 + + Rocket Launcher (quake / tf2) 2 shots to kill
@@ -17,7 +22,6 @@
 + Maps
 + + Titanfall 2 type 1v1 map
 + + Penshaw monument map (with worm killbox) 
-+ + Castle Ruins / Chapel
 
 + Main Menu
 + Playlist 
@@ -34,6 +38,7 @@
 
 
 # Done
++ + Castle Ruins / Chapel
 + Multiplayer
 + Grapple Hook
 + Stim
