@@ -2,6 +2,7 @@
 + Multiplayer: Host spawn point bugged (0.353560001,0.0799999237,-12.4499998)
 + Multiplayer: Abilites need to be network objects
 + Abilites: Can counteract grapplehook by holding S
++ Abilites: need to add a layer mask excluding the Player layer, wallrunning raycast hits players
 + Maps: Shit collision on chapel roof
 
 # To Add
