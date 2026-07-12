@@ -25,7 +25,7 @@ public abstract class WeaponBase : NetworkBehaviour {
         currentAmmo = maxAmmo;
         _playerController = GetComponentInParent<PlayerController>();
 
-        if (!IsOwner) enabled = false; // input only on owner
+        if (!IsOwner) enabled = false;
     }
 
     protected virtual void Update() {

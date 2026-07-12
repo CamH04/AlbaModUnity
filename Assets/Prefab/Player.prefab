@@ -277,6 +277,37 @@ Transform:
   - {fileID: 6879915579160796766}
   m_Father: {fileID: 11117846306957980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1884490020200856118
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 418794385158314840}
+  m_Layer: 3
+  m_Name: WeaponHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &418794385158314840
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1884490020200856118}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.442, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 11117846306957980}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2178655720229111262
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,7 +363,7 @@ GameObject:
   - component: {fileID: 2435938228331450642}
   - component: {fileID: 8019475152193413377}
   - component: {fileID: -7064571964729746279}
-  - component: {fileID: 8633704007727983204}
+  - component: {fileID: 1133074205835015485}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -356,6 +387,7 @@ Transform:
   - {fileID: 6673821924969013201}
   - {fileID: 1539451229189139601}
   - {fileID: 4474127346835090353}
+  - {fileID: 418794385158314840}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &912730827437743003
@@ -815,7 +847,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &8633704007727983204
+--- !u!114 &1133074205835015485
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -824,19 +856,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5994856343534761650}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25d3854b775798340b3b61b9942e8f40, type: 3}
+  m_Script: {fileID: 11500000, guid: 6225685030d294448bc8c5bead6d75ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  weaponName: Weapon
-  fireRate: 1
-  maxAmmo: 20
-  currentAmmo: 0
-  reloadTime: 1.5
-  muzzle: {fileID: 4474127346835090353}
-  rocketPrefab: {fileID: 7211110670094490706, guid: b2589f7c3bb9b1747b95e4812128b0ea, type: 3}
-  rocketSpeed: 25
-  weaponModel: {fileID: 0}
+  weaponRegistry: {fileID: 11400000, guid: 4c748c0ac96309f4091984de449f8296, type: 2}
+  weaponHolder: {fileID: 418794385158314840}
 --- !u!1 &8220790024536940127
 GameObject:
   m_ObjectHideFlags: 0

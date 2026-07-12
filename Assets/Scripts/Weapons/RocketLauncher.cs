@@ -7,9 +7,6 @@ public class RocketLauncher : WeaponBase {
     public GameObject rocketPrefab;
     public float rocketSpeed = 25f;
 
-    [Header("Visual")]
-    public GameObject weaponModel;
-
     private Camera _playerCamera;
 
     public override void OnNetworkSpawn() {
@@ -17,12 +14,16 @@ public class RocketLauncher : WeaponBase {
 
         if (!IsOwner) return;
 
-        // Find the camera that belongs to THIS player specifically
-        // by searching children of this player object
-        _playerCamera = GetComponentInChildren<Camera>(true);
+        // Camera is on the parent player, not this weapon prefab
+        // so search up the hierarchy instead of just children
+        _playerCamera = GetComponentInParent<Camera>();
+
+        // If not found in parent, try children of the parent
+        if (_playerCamera == null)
+            _playerCamera = transform.root.GetComponentInChildren<Camera>(true);
 
         if (_playerCamera == null)
-            Debug.LogError("RocketLauncher could not find a camera in children!");
+            Debug.LogError("RocketLauncher: could not find player camera!");
         else
             Debug.Log($"RocketLauncher found camera: {_playerCamera.gameObject.name}");
     }
@@ -44,11 +45,10 @@ public class RocketLauncher : WeaponBase {
         _nextFireTime = Time.time + 1f / fireRate;
         currentAmmo--;
 
-        // Read direction directly from our own camera transform
         Vector3 fireDirection = _playerCamera.transform.forward;
         Vector3 firePosition = _playerCamera.transform.position;
 
-        Debug.Log($"Firing rocket — direction: {fireDirection} | position: {firePosition}");
+        Debug.Log($"Firing rocket — direction: {fireDirection}");
 
         FireServerRpc(firePosition, fireDirection);
 
@@ -58,11 +58,9 @@ public class RocketLauncher : WeaponBase {
 
     protected override void SpawnProjectile(Vector3 position, Vector3 direction) {
         if (rocketPrefab == null) {
-            Debug.LogError("Rocket prefab is null!");
+            Debug.LogError("RocketLauncher: rocket prefab is null!");
             return;
         }
-
-        Debug.Log($"Spawning rocket at {position} facing {direction}");
 
         var rocketObj = Instantiate(rocketPrefab, position,
             Quaternion.LookRotation(direction));

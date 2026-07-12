@@ -1,21 +1,6 @@
-# Link To Trello Board: https://trello.com/b/vTTwVn4M
-
-# Known Bugs
-+ Player : Keeps sinking halfway through the floor
-+ Player : Can see their own mesh as the camera moves
-
-+ Rocket Launcher Damage on Client is strange (only doing like 20 on hit)
-
-+ Multiplayer: Host spawn point bugged (0.353560001,0.0799999237,-12.4499998)
-+ Multiplayer: Abilites need to be network objects
-
-+ Abilites: Can counteract grapplehook by holding S
-+ Abilites: need to add a layer mask excluding the Player layer, wallrunning raycast hits players
-
-+ Maps: Shit collision on chapel roof
+# Link To Bugs Trello Board: https://trello.com/b/vTTwVn4M
 
 # To Add
-+ Guns
 + Killfeed
 
 + Guns
