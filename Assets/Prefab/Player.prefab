@@ -647,12 +647,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraHolder: {fileID: 1539451229189139601}
   motor: {fileID: 8753623717581365268}
-  grappleRange: 30
+  grappleRange: 50
   grappleSpeed: 20
   grappleCooldown: 5
   arrivalDistance: 2
-  grapplePullStrength: 25
-  maxGrappleSpeed: 35
+  grapplePullStrength: 20
+  maxGrappleSpeed: 2000
   launchUpward: 4
   grappleMask:
     serializedVersion: 2

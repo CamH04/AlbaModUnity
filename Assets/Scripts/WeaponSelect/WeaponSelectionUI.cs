@@ -22,12 +22,23 @@ public class WeaponSelectionUI : MonoBehaviour {
     private Button[] _buttons;
 
     void Start() {
+        // Validate registry assigned
+        if (weaponRegistry == null) {
+            Debug.LogError("WeaponSelectionUI: WeaponRegistry not assigned in Inspector!");
+            return;
+        }
+
+        if (weaponRegistry.weapons == null || weaponRegistry.weapons.Length == 0) {
+            Debug.LogError("WeaponSelectionUI: WeaponRegistry has no weapons!");
+            return;
+        }
+
+        Debug.Log($"WeaponSelectionUI: building list with {weaponRegistry.weapons.Length} weapons");
         BuildWeaponList();
         SelectWeapon(0);
     }
 
     void BuildWeaponList() {
-        // Clear existing buttons
         foreach (Transform child in weaponButtonContainer)
             Destroy(child.gameObject);
 
@@ -38,19 +49,23 @@ public class WeaponSelectionUI : MonoBehaviour {
             var btnObj = Instantiate(weaponButtonPrefab, weaponButtonContainer);
             var btn = btnObj.GetComponent<Button>();
 
-            // Set icon
+            if (btn == null) {
+                Debug.LogError($"WeaponSelectionUI: button prefab has no Button component!");
+                continue;
+            }
+
             var icon = btnObj.transform.Find("Icon")?.GetComponent<Image>();
             if (icon != null && entry.weaponIcon != null)
                 icon.sprite = entry.weaponIcon;
 
-            // Set name label
             var label = btnObj.transform.Find("Label")?.GetComponent<TextMeshProUGUI>();
             if (label != null)
                 label.text = entry.weaponName;
+            else
+                Debug.LogWarning($"WeaponSelectionUI: button prefab missing 'Label' child TextMeshPro");
 
-            int index = i; // capture for lambda
+            int index = i;
             btn.onClick.AddListener(() => SelectWeapon(index));
-
             _buttons[i] = btn;
         }
     }
@@ -58,27 +73,45 @@ public class WeaponSelectionUI : MonoBehaviour {
     void SelectWeapon(int index) {
         _selectedIndex = index;
 
-        // Update button highlight colors
         for (int i = 0; i < _buttons.Length; i++) {
+            if (_buttons[i] == null) continue;
             var img = _buttons[i].GetComponent<Image>();
             if (img != null)
                 img.color = i == index ? selectedColor : unselectedColor;
         }
 
-        // Update info panel
         var weapon = weaponRegistry.weapons[index];
-        if (selectedWeaponIcon != null && weapon.weaponIcon != null)
+
+        if (selectedWeaponIcon != null)
             selectedWeaponIcon.sprite = weapon.weaponIcon;
         if (selectedWeaponName != null)
             selectedWeaponName.text = weapon.weaponName;
         if (selectedWeaponDescription != null)
             selectedWeaponDescription.text = weapon.weaponDescription;
 
-        // Tell the server our selection
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient) {
-            if (PlayerWeaponSelection.Instance != null)
-                PlayerWeaponSelection.Instance.SelectWeaponServerRpc(
-                    index, NetworkManager.Singleton.LocalClientId);
+        // Only send to server if already connected
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient
+            && PlayerWeaponSelection.Instance != null) {
+            PlayerWeaponSelection.Instance.SelectWeaponServerRpc(
+                index, NetworkManager.Singleton.LocalClientId);
+        }
+        else {
+            // Store locally and send when connected
+            _pendingSelection = index;
+        }
+    }
+
+    private int _pendingSelection = 0;
+
+    void Update() {
+        // Send pending selection once connected
+        if (_pendingSelection >= 0
+            && NetworkManager.Singleton != null
+            && NetworkManager.Singleton.IsConnectedClient
+            && PlayerWeaponSelection.Instance != null) {
+            PlayerWeaponSelection.Instance.SelectWeaponServerRpc(
+                _pendingSelection, NetworkManager.Singleton.LocalClientId);
+            _pendingSelection = -1;
         }
     }
 }

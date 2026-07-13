@@ -17,3 +17,8 @@ MonoBehaviour:
     weaponIcon: {fileID: 21300000, guid: f2860c3ef5fc000458836c0b11cc27f9, type: 3}
     weaponDescription: The classical :)
     weaponPrefab: {fileID: 2618346799161084390, guid: f30dae326fca53e4b9f3a2bf04e37ee6, type: 3}
+  - weaponName: Hunting Rifle
+    weaponIcon: {fileID: 21300000, guid: a535a732b7994f04faba8f0b67ce5a5b, type: 3}
+    weaponDescription: Bolt-action marksman rifle. Will obliterate anything between
+      the barrel and the wall behind him.
+    weaponPrefab: {fileID: 2618346799161084390, guid: f30dae326fca53e4b9f3a2bf04e37ee6, type: 3}

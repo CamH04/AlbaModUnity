@@ -11,23 +11,30 @@ public class RocketLauncher : WeaponBase {
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
-
         if (!IsOwner) return;
+        StartCoroutine(FindCamera());
+    }
 
-        // Camera is on the parent player, not this weapon prefab
-        // so search up the hierarchy instead of just children
-        _playerCamera = GetComponentInParent<Camera>();
+    System.Collections.IEnumerator FindCamera() {
+        // Wait until camera is available on the parent player
+        float timeout = 5f;
+        float elapsed = 0f;
 
-        // If not found in parent, try children of the parent
-        if (_playerCamera == null)
+        while (_playerCamera == null && elapsed < timeout) {
+            // Search up to root then back down including inactive objects
             _playerCamera = transform.root.GetComponentInChildren<Camera>(true);
 
+            if (_playerCamera == null)
+                yield return new WaitForSeconds(0.1f);
+
+            elapsed += 0.1f;
+        }
+
         if (_playerCamera == null)
-            Debug.LogError("RocketLauncher: could not find player camera!");
+            Debug.LogError("RocketLauncher: timed out looking for player camera!");
         else
             Debug.Log($"RocketLauncher found camera: {_playerCamera.gameObject.name}");
     }
-
     protected override void HandleInput() {
         if (!IsOwner) return;
 
