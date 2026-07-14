@@ -31,20 +31,25 @@ public class WeaponSpawner : NetworkBehaviour {
             Destroy(_currentWeapon);
         }
 
-        // Use weapon holder if assigned, otherwise fall back to player root
         var holder = weaponHolder != null ? weaponHolder : transform;
 
         _currentWeapon = Instantiate(
             entry.weaponPrefab,
             holder.position,
             holder.rotation,
-            holder              // parent to weapon holder so it moves with the player
+            holder
         );
 
         var netObj = _currentWeapon.GetComponent<NetworkObject>();
         if (netObj != null)
             netObj.SpawnWithOwnership(OwnerClientId);
 
-        Debug.Log($"Spawned {entry.weaponName} for client {OwnerClientId}");
+        // Pass the player's camera directly to the weapon
+        var playerCamera = GetComponentInChildren<Camera>(true);
+        var weapon = _currentWeapon.GetComponent<WeaponBase>();
+        if (weapon != null)
+            weapon.SetCamera(playerCamera);
+
+        Debug.Log($"Spawned {entry.weaponName} for client {OwnerClientId} | camera: {(playerCamera != null ? playerCamera.name : "NULL")}");
     }
 }

@@ -9,32 +9,20 @@ public class RocketLauncher : WeaponBase {
 
     private Camera _playerCamera;
 
+    // Called by WeaponSpawner after instantiation
+    public override void SetCamera(Camera cam) {
+        _playerCamera = cam;
+        if (_playerCamera == null)
+            Debug.LogError("RocketLauncher.SetCamera: received null camera!");
+        else
+            Debug.Log($"RocketLauncher camera set: {_playerCamera.gameObject.name}");
+    }
+
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
-        if (!IsOwner) return;
-        StartCoroutine(FindCamera());
+        // Camera is set via SetCamera() from WeaponSpawner, no search needed
     }
 
-    System.Collections.IEnumerator FindCamera() {
-        // Wait until camera is available on the parent player
-        float timeout = 5f;
-        float elapsed = 0f;
-
-        while (_playerCamera == null && elapsed < timeout) {
-            // Search up to root then back down including inactive objects
-            _playerCamera = transform.root.GetComponentInChildren<Camera>(true);
-
-            if (_playerCamera == null)
-                yield return new WaitForSeconds(0.1f);
-
-            elapsed += 0.1f;
-        }
-
-        if (_playerCamera == null)
-            Debug.LogError("RocketLauncher: timed out looking for player camera!");
-        else
-            Debug.Log($"RocketLauncher found camera: {_playerCamera.gameObject.name}");
-    }
     protected override void HandleInput() {
         if (!IsOwner) return;
 
@@ -47,7 +35,10 @@ public class RocketLauncher : WeaponBase {
 
     protected override void Fire() {
         if (!CanFire) return;
-        if (_playerCamera == null) return;
+        if (_playerCamera == null) {
+            Debug.LogError("RocketLauncher: no camera assigned, cannot fire!");
+            return;
+        }
 
         _nextFireTime = Time.time + 1f / fireRate;
         currentAmmo--;

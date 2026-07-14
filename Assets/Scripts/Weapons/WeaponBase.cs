@@ -16,6 +16,8 @@ public abstract class WeaponBase : NetworkBehaviour {
     protected bool _isReloading;
     protected PlayerController _playerController;
 
+    public virtual void SetCamera(Camera cam) { }
+
     public bool CanFire => !_isReloading
                         && currentAmmo > 0
                         && Time.time >= _nextFireTime
