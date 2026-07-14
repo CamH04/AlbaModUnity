@@ -1,34 +1,45 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(AudioSource))]
 public class SniperRifle : HitscanBase {
     private Camera playerCamera;
-    private AudioSource audioSource;
 
     [Header("Audio")]
     [SerializeField] private AudioClip fireSound;
     [SerializeField, Range(0f, 1f)] private float fireVolume = 1f;
 
-    [Header("Zoom")]
-    [SerializeField] private float normalFOV = 60f;
-    [SerializeField] private float zoomFOV = 20f;
-    [SerializeField] private float zoomSpeed = 10f;
+    [Header("Scope")]
+    [SerializeField] private GameObject scopeOverlay;
 
-    private bool isZooming;
+    [Header("Scope Zoom")]
+    [SerializeField] private float zoomFOV = 20f;
+    [SerializeField] private float zoomSpeed = 12f;
+
+    private float defaultFOV;
+    private bool fovInitialized;
+
+    private AudioSource audioSource;
+    private bool isAiming;
 
     private void Awake() {
         audioSource = GetComponent<AudioSource>();
+
+        if (scopeOverlay != null)
+            scopeOverlay.SetActive(false);
     }
 
     public override void SetCamera(Camera cam) {
         playerCamera = cam;
-        if (playerCamera != null)
-            normalFOV = playerCamera.fieldOfView;
+
+        if (playerCamera != null) {
+            defaultFOV = playerCamera.fieldOfView;
+            fovInitialized = true;
+        }
     }
 
     private void Update() {
-        HandleZoom();
+        HandleZoomOverlay();
         HandleInput();
     }
 
@@ -43,21 +54,31 @@ public class SniperRifle : HitscanBase {
             StartCoroutine(Reload());
     }
 
-    private void HandleZoom() {
+    private void HandleZoomOverlay() {
         if (!IsOwner || playerCamera == null)
             return;
 
-        isZooming = Mouse.current != null && Mouse.current.rightButton.isPressed;
+        isAiming = Mouse.current != null && Mouse.current.rightButton.isPressed;
 
-        float targetFOV = isZooming ? zoomFOV : normalFOV;
+        if (scopeOverlay != null)
+            scopeOverlay.SetActive(isAiming);
+
+        if (!fovInitialized) {
+            defaultFOV = playerCamera.fieldOfView;
+            fovInitialized = true;
+        }
+
+        float targetFOV = isAiming ? zoomFOV : defaultFOV;
+
         playerCamera.fieldOfView = Mathf.Lerp(
             playerCamera.fieldOfView,
             targetFOV,
-            Time.deltaTime * zoomSpeed);
+            Time.deltaTime * zoomSpeed
+        );
     }
 
     protected override void Fire() {
-        if (!CanFire)
+        if (!CanFire || playerCamera == null)
             return;
 
         _nextFireTime = Time.time + 1f / fireRate;

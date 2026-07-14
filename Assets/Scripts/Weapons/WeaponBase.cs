@@ -4,8 +4,8 @@ using UnityEngine;
 public abstract class WeaponBase : NetworkBehaviour {
     [Header("Base Weapon Settings")]
     public string weaponName = "Weapon";
-    public float fireRate = 1f;      // shots per second
-    public int maxAmmo = 20;
+    public float fireRate = 2f;      // shots per second
+    public int maxAmmo = 200000;
     public int currentAmmo;
     public float reloadTime = 1.5f;
 

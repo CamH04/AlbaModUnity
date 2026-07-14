@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: WeaponRegistry
   m_EditorClassIdentifier: 
   weapons:
-  - weaponName: Rocket Launcher
+  - weaponName: AT7 World Ender
     weaponIcon: {fileID: 21300000, guid: f2860c3ef5fc000458836c0b11cc27f9, type: 3}
-    weaponDescription: The classical :)
+    weaponDescription: 'Blow your legs off with this, blow another nightingale to
+      bits with it. Up to you '
     weaponPrefab: {fileID: 2618346799161084390, guid: f30dae326fca53e4b9f3a2bf04e37ee6, type: 3}
-  - weaponName: Hunting Rifle
+  - weaponName: HAMR Concrete Puncher
     weaponIcon: {fileID: 21300000, guid: a535a732b7994f04faba8f0b67ce5a5b, type: 3}
-    weaponDescription: Bolt-action marksman rifle. Will obliterate anything between
-      the barrel and the wall behind him.
+    weaponDescription: Heavy Bolt-action marksman rifle. Will obliterate anything
+      between the barrel and the wall behind him. Due to the weight of the rifle,
+      your movement may be impared
     weaponPrefab: {fileID: 2618346799161084390, guid: dbf59dd14ae2e2b4ca781cb27afcf0cc, type: 3}
