@@ -31,13 +31,17 @@ public class WeaponSpawner : NetworkBehaviour {
             Destroy(_currentWeapon);
         }
 
-        var holder = weaponHolder != null ? weaponHolder : transform;
-
+        // NOTE: We intentionally do NOT parent here and do NOT pass a parent
+        // into Instantiate. Unity-level parenting done before Spawn() is not
+        // replicated by Netcode, and TrySetParent() requires the parent
+        // transform to have its own NetworkObject (weaponHolder usually
+        // doesn't, since it's just a hand/camera socket). Instead, each
+        // weapon attaches itself locally on every client in its own
+        // OnNetworkSpawn (see WeaponBase/RocketLauncher).
         _currentWeapon = Instantiate(
             entry.weaponPrefab,
-            holder.position,
-            holder.rotation,
-            holder
+            Vector3.zero,
+            Quaternion.identity
         );
 
         var netObj = _currentWeapon.GetComponent<NetworkObject>();

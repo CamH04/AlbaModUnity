@@ -7,7 +7,7 @@
 + Game Design: Cameron (Alba)
 
 ## Art
-+ Models: Stephane C (ccv4)
++ Models: Stephane C (ccv4), Shazly (Sketchfab)
 
 ## Audio
 + Music: Fiddlesticks_ 

@@ -1,4 +1,4 @@
-using Unity.Netcode;
+ï»¿using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,24 +12,14 @@ public class RocketLauncher : WeaponBase {
     public GameObject rocketPrefab;
     public float rocketSpeed = 25f;
 
-    private Camera _playerCamera;
-
     private void Awake() {
         audioSource = GetComponent<AudioSource>();
     }
 
-    // Called by WeaponSpawner after instantiation
-    public override void SetCamera(Camera cam) {
-        _playerCamera = cam;
-        if (_playerCamera == null)
-            Debug.LogError("RocketLauncher.SetCamera: received null camera!");
-        else
-            Debug.Log($"RocketLauncher camera set: {_playerCamera.gameObject.name}");
-    }
-
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
-        // Camera is set via SetCamera() from WeaponSpawner, no search needed
+        // Camera and weaponHolder are both resolved locally per-client in
+        // WeaponBase.ResolveFollowTarget(), no extra work needed here.
     }
 
     protected override void HandleInput() {
@@ -55,7 +45,7 @@ public class RocketLauncher : WeaponBase {
         Vector3 fireDirection = _playerCamera.transform.forward;
         Vector3 firePosition = _playerCamera.transform.position;
 
-        Debug.Log($"Firing rocket — direction: {fireDirection}");
+        Debug.Log($"Firing rocket ï¿½ direction: {fireDirection}");
 
         if (fireSound != null && audioSource != null)
             audioSource.PlayOneShot(fireSound, fireVolume);
