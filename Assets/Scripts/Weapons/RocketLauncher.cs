@@ -3,11 +3,20 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class RocketLauncher : WeaponBase {
+    [Header("Audio")]
+    [SerializeField] private AudioClip fireSound;
+    [SerializeField, Range(0f, 1f)] private float fireVolume = 1f;
+    private AudioSource audioSource;
+
     [Header("Rocket Launcher Settings")]
     public GameObject rocketPrefab;
     public float rocketSpeed = 25f;
 
     private Camera _playerCamera;
+
+    private void Awake() {
+        audioSource = GetComponent<AudioSource>();
+    }
 
     // Called by WeaponSpawner after instantiation
     public override void SetCamera(Camera cam) {
@@ -47,6 +56,9 @@ public class RocketLauncher : WeaponBase {
         Vector3 firePosition = _playerCamera.transform.position;
 
         Debug.Log($"Firing rocket — direction: {fireDirection}");
+
+        if (fireSound != null && audioSource != null)
+            audioSource.PlayOneShot(fireSound, fireVolume);
 
         FireServerRpc(firePosition, fireDirection);
 
