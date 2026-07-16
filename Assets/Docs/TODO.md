@@ -1,7 +1,6 @@
 # Link To Bugs Trello Board: https://trello.com/b/vTTwVn4M
 
 # Changes
-+ rotate chapel in chapel map 
 
 # To Add
 + Killfeed
