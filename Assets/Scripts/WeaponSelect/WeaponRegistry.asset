@@ -24,3 +24,7 @@ MonoBehaviour:
       between the barrel and the wall behind him. Due to the weight of the rifle,
       your movement may be impared
     weaponPrefab: {fileID: 2618346799161084390, guid: dbf59dd14ae2e2b4ca781cb27afcf0cc, type: 3}
+  - weaponName: Chain Wrap
+    weaponIcon: {fileID: 21300000, guid: fa83d381e9a2d2e40b54d287c4ce5fc0, type: 3}
+    weaponDescription: Wrap a chain around a target and pull yourself towards them
+    weaponPrefab: {fileID: 3541316787910683251, guid: fa4d9a31d9d4a014eaeee1a3f3477d71, type: 3}

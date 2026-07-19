@@ -4,16 +4,16 @@ using UnityEngine;
 public class PlayerMotor : MonoBehaviour {
     [Header("Ground Movement")]
     public float maxGroundSpeed = 12f;
-    public float groundAccelerate = 14f;   // Low — you build speed, not instant max
-    public float groundDecelerate = 10f;   // Separate decel for stopping feel
+    public float groundAccelerate = 14f;
+    public float groundDecelerate = 10f;
     public float groundFriction = 6f;
 
     [Header("Air Movement")]
-    public float maxAirSpeed = 0.8f;  // Cap per-frame air add
-    public float airAccelerate = 800f;  // High — strafing works
-    public float gravity = 28f;   // Heavy gravity — no floaty arc
-    public float fallGravityMult = 1.6f;  // Extra gravity on the way down
-    public float jumpCutMultiplier = 0.4f;  // Tap jump = short hop
+    public float maxAirSpeed = 0.8f;
+    public float airAccelerate = 800f;
+    public float gravity = 28f;
+    public float fallGravityMult = 1.6f;
+    public float jumpCutMultiplier = 0.4f;
 
     [Header("Jumping")]
     public float jumpForce = 10f;
@@ -21,7 +21,7 @@ public class PlayerMotor : MonoBehaviour {
     public bool allowDoubleJump = true;
 
     [Header("Speed Cap")]
-    public float absoluteSpeedCap = 40f;    // Prevents infinite bhop speed
+    public float absoluteSpeedCap = 40f;
 
     [Header("References")]
     public Transform orientation;
@@ -32,10 +32,16 @@ public class PlayerMotor : MonoBehaviour {
     private bool _jumpHeld;
     private bool _hasDoubleJump;
 
+    private float _momentumTimer;
+
+    private bool _isGrappling;
+    private Vector3 _grappleTarget;
+    private float _grappleSpeed;
+    private float _grappleStopDistance;
+
     public Vector3 Velocity => _velocity;
     public bool IsGrounded => _cc.isGrounded;
-
-    private float _momentumTimer;
+    public bool IsGrappling => _isGrappling;
 
     void Awake() {
         _cc = GetComponent<CharacterController>();
@@ -50,6 +56,57 @@ public class PlayerMotor : MonoBehaviour {
         _velocity.z = vel.z;
     }
 
+    public void PreserveMomentum(float duration) {
+        _momentumTimer = duration;
+    }
+
+    public void StartGrapple(Vector3 target, float speed, float stopDistance) {
+        _grappleTarget = target;
+        _grappleSpeed = speed;
+        _grappleStopDistance = stopDistance;
+        _isGrappling = true;
+
+        Vector3 toTarget = _grappleTarget - transform.position;
+        toTarget.y = 0f;
+
+        if (toTarget.sqrMagnitude > 0.001f)
+            _velocity = toTarget.normalized * _grappleSpeed;
+        else if (orientation != null)
+            _velocity = orientation.forward * _grappleSpeed;
+        else
+            _velocity = transform.forward * _grappleSpeed;
+
+        _jumpQueued = false;
+        _hasDoubleJump = false;
+    }
+
+    public void StopGrapple() {
+        _isGrappling = false;
+        _velocity = Vector3.zero;
+    }
+
+    public bool GrappleStep() {
+        if (!_isGrappling) return false;
+
+        Vector3 toTarget = _grappleTarget - transform.position;
+        float dist = toTarget.magnitude;
+
+        if (dist <= _grappleStopDistance) {
+            StopGrapple();
+            return false;
+        }
+
+        Vector3 dir = toTarget.normalized;
+        _velocity = dir * _grappleSpeed;
+
+        Vector3 step = _velocity * Time.fixedDeltaTime;
+        if (step.magnitude > dist)
+            step = toTarget;
+
+        _cc.Move(step);
+        return true;
+    }
+
     public void Move(Vector2 inputDir, bool jumpHeld) {
         _jumpHeld = jumpHeld;
 
@@ -60,7 +117,7 @@ public class PlayerMotor : MonoBehaviour {
         if (_cc.isGrounded) {
             _hasDoubleJump = false;
 
-            if (_velocity.y < 0) _velocity.y = -4f; // Snappy landing, not floaty
+            if (_velocity.y < 0) _velocity.y = -4f;
 
             ApplyFriction(wishDir);
             GroundAccelerate(wishDir);
@@ -71,7 +128,6 @@ public class PlayerMotor : MonoBehaviour {
             }
         }
         else {
-            // Double jump
             if (_jumpQueued && _hasDoubleJump) {
                 _velocity.y = jumpForce;
                 _hasDoubleJump = false;
@@ -82,7 +138,6 @@ public class PlayerMotor : MonoBehaviour {
             ApplyGravity();
         }
 
-        // Hard speed cap — lets momentum build but prevents runaway speed
         Vector3 flat = new Vector3(_velocity.x, 0, _velocity.z);
         if (flat.magnitude > absoluteSpeedCap) {
             flat = flat.normalized * absoluteSpeedCap;
@@ -95,10 +150,8 @@ public class PlayerMotor : MonoBehaviour {
     }
 
     void ApplyGravity() {
-        // Heavier gravity on the way down — snappy arc, not floaty
         float mult = _velocity.y < 0 ? fallGravityMult : 1f;
 
-        // Jump cut — tap space for a short hop
         if (!_jumpHeld && _velocity.y > 0)
             mult = jumpCutMultiplier * fallGravityMult;
 
@@ -106,7 +159,6 @@ public class PlayerMotor : MonoBehaviour {
     }
 
     void ApplyFriction(Vector3 wishDir) {
-        // Don't bleed speed during momentum window
         if (_momentumTimer > 0f) {
             _momentumTimer -= Time.fixedDeltaTime;
             return;
@@ -135,20 +187,16 @@ public class PlayerMotor : MonoBehaviour {
 
         float currentSpeed = Vector3.Dot(_velocity, wishDir);
         float addSpeed = Mathf.Clamp(maxGroundSpeed - currentSpeed, 0,
-                                groundAccelerate * Time.fixedDeltaTime);
+            groundAccelerate * Time.fixedDeltaTime);
         _velocity += wishDir * addSpeed;
     }
 
-    // Quake/Source air strafing — high accel, low per-frame cap
-    // Pressing A/D curves your trajectory without killing speed
     void AirAccelerate(Vector3 wishDir) {
         if (wishDir.sqrMagnitude < 0.01f) return;
 
-        // During momentum window, only allow strafing — don't cap existing speed
         if (_momentumTimer > 0f) {
             _momentumTimer -= Time.fixedDeltaTime;
 
-            // Still allow air strafing to steer but don't reduce velocity
             float currentSpeed = Vector3.Dot(_velocity, wishDir);
             float addSpeed = maxAirSpeed - currentSpeed;
             if (addSpeed <= 0) return;
@@ -168,9 +216,4 @@ public class PlayerMotor : MonoBehaviour {
         _velocity.x += wishDir.x * accelSpeed2;
         _velocity.z += wishDir.z * accelSpeed2;
     }
-
-    public void PreserveMomentum(float duration) {
-        _momentumTimer = duration;
-    }
-
 }

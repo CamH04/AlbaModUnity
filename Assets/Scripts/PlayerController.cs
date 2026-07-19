@@ -6,7 +6,7 @@ using Unity.Netcode;
 [RequireComponent(typeof(PlayerMotor))]
 [RequireComponent(typeof(WallRunController))]
 [RequireComponent(typeof(SlideController))]
-public class PlayerController : NetworkBehaviour{
+public class PlayerController : NetworkBehaviour {
     [Header("References")]
     public Transform orientation;
     public Transform cameraHolder;
@@ -44,6 +44,7 @@ public class PlayerController : NetworkBehaviour{
     private float _currentTilt;
 
     private bool _isOwned = false;
+
     void Awake() {
         _motor = GetComponent<PlayerMotor>();
         _wallRun = GetComponent<WallRunController>();
@@ -58,38 +59,27 @@ public class PlayerController : NetworkBehaviour{
                 ? playerCamera.transform.parent
                 : playerCamera.transform;
         if (orientation == null) orientation = transform;
-
-        // Don't touch cursor here
     }
+
     public override void OnNetworkSpawn() {
         _isOwned = IsOwner;
 
-        Debug.Log($"[{gameObject.name}] OnNetworkSpawn — IsOwner:{IsOwner} OwnerClientId:{OwnerClientId} LocalClient:{NetworkManager.Singleton.LocalClientId}");
-
         if (!IsOwner) {
-            // Disable all cameras on remote players
-            foreach (var cam in GetComponentsInChildren<Camera>(true)) {
+            foreach (var cam in GetComponentsInChildren<Camera>(true))
                 cam.gameObject.SetActive(false);
-                Debug.Log($"Disabled camera {cam.gameObject.name} on non-owner player (owner={OwnerClientId})");
-            }
 
-            // Disable audio listeners on remote players
             foreach (var listener in GetComponentsInChildren<AudioListener>(true))
                 listener.enabled = false;
         }
         else {
-            // Lock cursor for local owner
             if (SceneManager.GetActiveScene().name == "Game") {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
 
-            // Disable the FallbackCamera if it exists
             var fallback = GameObject.Find("FallbackCamera");
             if (fallback != null) fallback.SetActive(false);
         }
-    }
-    void OnEnable() {
     }
 
     void OnDisable() {
@@ -143,12 +133,19 @@ public class PlayerController : NetworkBehaviour{
 
     void FixedUpdate() {
         if (!_isOwned) return;
+
+        if (_motor.IsGrappling) {
+            _motor.GrappleStep();
+            return;
+        }
+
         float hSpeed = new Vector3(_motor.Velocity.x, 0, _motor.Velocity.z).magnitude;
+
         if (_wallRun.JustStoppedWallRun) {
             _motor.GrantDoubleJump();
             _wallRun.ConsumeStopFlag();
         }
-        // Wall run
+
         if (!_motor.IsGrounded && _wallRun.OnAnyWall() && !_slide.IsSliding) {
             if (!_wallRun.IsWallRunning)
                 _wallRun.TryStartWallRun(hSpeed);
@@ -171,7 +168,6 @@ public class PlayerController : NetworkBehaviour{
             if (_wallRun.IsWallRunning) _wallRun.StopWallRun();
         }
 
-        // Slide
         if (_slide.IsSliding) {
             _motor.SetVelocity(_slide.GetSlideVelocity(_motor.Velocity));
             _motor.Move(Vector2.zero, false);
@@ -183,6 +179,7 @@ public class PlayerController : NetworkBehaviour{
 
         _motor.Move(_moveInput, _jumpHeld);
     }
+
     void LateUpdate() {
         if (!_isOwned) return;
         float targetTilt = 0f;
