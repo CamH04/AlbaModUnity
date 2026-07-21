@@ -539,7 +539,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraHolder: {fileID: 1539451229189139601}
   motor: {fileID: 8753623717581365268}
-  grappleRange: 50
+  grappleRange: 150
   grappleSpeed: 20
   grappleCooldown: 5
   arrivalDistance: 2
