@@ -1,6 +1,7 @@
 # Link To Bugs Trello Board: https://trello.com/b/vTTwVn4M
 
 # Changes To Do
++ Make respawn 5 seconds
 + Overhall netcode before playtest
 
 # To Add
@@ -18,7 +19,6 @@
 + + Forest Map with Fog of war, a collection of high up treehouses (decrpit, rotten)
 
 
-+ Datamosh death screen
 + Pause Menu
 + Playlist
 + Pause Menu
@@ -32,6 +32,7 @@
 
 
 # Done
++ Datamosh death screen
 + Killfeed
 + Chain Lash
 + Updated Main Menu
