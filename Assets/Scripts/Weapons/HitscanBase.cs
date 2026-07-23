@@ -11,21 +11,29 @@ public abstract class HitscanBase : WeaponBase {
     public GameObject impactEffect;
 
     protected override void SpawnProjectile(Vector3 origin, Vector3 direction) {
+        // Only runs on server — called by FireServerRpc in WeaponBase
         FireHitscan(origin, direction);
     }
 
+    // Override WeaponBase's ServerRpc to remove ownership requirement
+    // so clients can call it on a server-owned weapon object
+    [ServerRpc(RequireOwnership = false)]
+    protected override void FireServerRpc(Vector3 position, Vector3 direction) {
+        SpawnProjectile(position, direction);
+    }
+
     protected virtual void FireHitscan(Vector3 origin, Vector3 direction) {
+        if (!IsServer) return;
+
         if (!Physics.Raycast(origin, direction, out RaycastHit hit, range, hitMask))
             return;
 
         PlayerHealth health = hit.collider.GetComponentInParent<PlayerHealth>();
 
-        if (health != null && !health.IsDead) {
+        if (health != null && !health.IsDead)
             OnPlayerHit(health, hit);
-        }
 
         SpawnImpactClientRpc(hit.point, hit.normal);
-
         OnHit(hit);
     }
 
@@ -33,20 +41,14 @@ public abstract class HitscanBase : WeaponBase {
         player.TakeDamage(damage);
     }
 
-    protected virtual void OnHit(RaycastHit hit) {
-
-    }
+    protected virtual void OnHit(RaycastHit hit) { }
 
     [ClientRpc]
     void SpawnImpactClientRpc(Vector3 position, Vector3 normal) {
-        if (impactEffect == null)
-            return;
+        if (impactEffect == null) return;
 
-        GameObject fx = Instantiate(
-            impactEffect,
-            position,
+        var fx = Instantiate(impactEffect, position,
             Quaternion.LookRotation(normal));
-
         Destroy(fx, 2f);
     }
 }
