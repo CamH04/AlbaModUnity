@@ -7,6 +7,9 @@ public class PlayerHealth : NetworkBehaviour {
     public float maxHealth = 100f;
     public float respawnDelay = 3f;
 
+    private ulong _lastDamageSourceClientId;
+    private string _lastDamageWeaponName = "Unknown";
+
     // Synced to all clients automatically
     private NetworkVariable<float> _health = new NetworkVariable<float>(
         100f,
@@ -45,9 +48,13 @@ public class PlayerHealth : NetworkBehaviour {
     }
 
     // Called on the server only — e.g. from a bullet hit
-    public void TakeDamage(float amount) {
+    public void TakeDamage(float amount, ulong attackerClientId = 0,
+    string weaponName = "Unknown") {
         if (!IsServer) return;
         if (_isDead) return;
+
+        _lastDamageSourceClientId = attackerClientId;
+        _lastDamageWeaponName = weaponName;
 
         _health.Value = Mathf.Max(0f, _health.Value - amount);
     }
@@ -62,7 +69,13 @@ public class PlayerHealth : NetworkBehaviour {
         _isDead = true;
         OnDied?.Invoke();
 
-        // Disable movement for owner
+        // Report to kill feed
+        if (IsServer && KillFeedManager.Instance != null)
+            KillFeedManager.Instance.ReportKill(
+                _lastDamageSourceClientId,
+                OwnerClientId,
+                _lastDamageWeaponName);
+
         if (IsOwner) {
             var pc = GetComponent<PlayerController>();
             if (pc != null) pc.enabled = false;
@@ -70,7 +83,6 @@ public class PlayerHealth : NetworkBehaviour {
             if (motor != null) motor.enabled = false;
         }
 
-        // Server handles respawn timer
         if (IsServer)
             StartCoroutine(RespawnAfterDelay());
     }

@@ -107,7 +107,7 @@ public class AbductChain : WeaponBase {
                 if (health.IsDead)
                     continue;
 
-                health.TakeDamage(damage);
+                health.TakeDamage(damage, OwnerClientId, "Chain Lash");
                 GrappleOwnerClientRpc(hit.point);
                 HitTargetClientRpc(origin, hit.point, health.OwnerClientId);
                 return;

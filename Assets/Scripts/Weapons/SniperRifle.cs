@@ -96,6 +96,7 @@ public class SniperRifle : HitscanBase {
     }
 
     protected override void OnPlayerHit(PlayerHealth player, RaycastHit hit) {
-        player.TakeDamage(150f);
+        PlayerHealth health = hit.collider.GetComponentInParent<PlayerHealth>();
+        health.TakeDamage(150f, OwnerClientId, "HAMR");
     }
 }

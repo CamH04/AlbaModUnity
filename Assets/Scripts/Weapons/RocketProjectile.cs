@@ -31,7 +31,7 @@ public class RocketProjectile : ProjectileBase {
 
         // Direct hit
         if (directHit != null && !directHit.IsDead) {
-            directHit.TakeDamage(directHitDamage);
+            directHit.TakeDamage(directHitDamage, shooterClientId, "Rocket Launcher");
             ApplyKnockback(directHit.gameObject, point, 1f);
         }
 
@@ -55,7 +55,7 @@ public class RocketProjectile : ProjectileBase {
                 if (health.OwnerClientId == shooterClientId)
                     damage *= selfDamageMultiplier;
 
-                health.TakeDamage(damage);
+                health.TakeDamage(damage * selfDamageMultiplier, shooterClientId, "Rocket Launcher");
                 ApplyKnockback(health.gameObject, point, falloff);
             }
         }
