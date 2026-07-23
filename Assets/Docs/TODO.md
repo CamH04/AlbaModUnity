@@ -1,15 +1,16 @@
 # Link To Bugs Trello Board: https://trello.com/b/vTTwVn4M
 
-# Changes
+# Changes To Do
++ Overhall netcode before playtest
 
 # To Add
-+ Killfeed
 
 + Guns
 + + Shotgun (nockgun) 1 shot at close range
 + + SMG (vector) 
 + + Throwing Knife 1 shot body
 + + Half Satoichi 
++ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit)
 
 + Maps
 + + Titanfall 2 type 1v1 map
@@ -18,19 +19,22 @@
 
 
 + Datamosh death screen
-+ Playlist 
-+ SFX
 + Pause Menu
-+ Settings 
-+ Leveling Feature With Profile
++ Playlist
++ Pause Menu
++ Settings
++ Random Map Select (spawns map prefab from list of prefabs) 
++ Stats (Locally Hosted)
 + Chat
 =============Then Playtest=============
 + Weapon inspects
-+ Achivments 
-+ Cosmetics for profile (banners titles)
++ Achivments
 
 
 # Done
++ Killfeed
++ Chain Lash
++ Updated Main Menu
 + Sniper (intervention or kraber) 1 shot body
 + Rocket Launcher (now applies knockback on hit)
 + Respawn

@@ -18,34 +18,37 @@ public class SniperRifle : HitscanBase {
 
     private float defaultFOV;
     private bool fovInitialized;
-
     private AudioSource audioSource;
     private bool isAiming;
 
     private void Awake() {
         audioSource = GetComponent<AudioSource>();
-
         if (scopeOverlay != null)
             scopeOverlay.SetActive(false);
     }
 
     public override void SetCamera(Camera cam) {
         playerCamera = cam;
-
         if (playerCamera != null) {
             defaultFOV = playerCamera.fieldOfView;
             fovInitialized = true;
         }
     }
 
-    private void Update() {
-        HandleZoomOverlay();
-        HandleInput();
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+
+        // Disable scope overlay on non-owners immediately
+        if (!IsOwner && scopeOverlay != null)
+            scopeOverlay.SetActive(false);
     }
 
+    // WeaponBase.Update calls HandleInput — we handle zoom here too
     protected override void HandleInput() {
-        if (!IsOwner)
-            return;
+        if (!IsOwner) return;
+        if (playerCamera == null) return;
+
+        HandleZoom();
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
             Fire();
@@ -54,22 +57,19 @@ public class SniperRifle : HitscanBase {
             StartCoroutine(Reload());
     }
 
-    private void HandleZoomOverlay() {
-        if (!IsOwner || playerCamera == null)
-            return;
-
+    private void HandleZoom() {
+        // Only runs inside HandleInput which already guards IsOwner
         isAiming = Mouse.current != null && Mouse.current.rightButton.isPressed;
 
         if (scopeOverlay != null)
             scopeOverlay.SetActive(isAiming);
 
-        if (!fovInitialized) {
+        if (!fovInitialized && playerCamera != null) {
             defaultFOV = playerCamera.fieldOfView;
             fovInitialized = true;
         }
 
         float targetFOV = isAiming ? zoomFOV : defaultFOV;
-
         playerCamera.fieldOfView = Mathf.Lerp(
             playerCamera.fieldOfView,
             targetFOV,
@@ -78,8 +78,7 @@ public class SniperRifle : HitscanBase {
     }
 
     protected override void Fire() {
-        if (!CanFire || playerCamera == null)
-            return;
+        if (!CanFire || playerCamera == null) return;
 
         _nextFireTime = Time.time + 1f / fireRate;
         currentAmmo--;
@@ -96,7 +95,8 @@ public class SniperRifle : HitscanBase {
     }
 
     protected override void OnPlayerHit(PlayerHealth player, RaycastHit hit) {
-        PlayerHealth health = hit.collider.GetComponentInParent<PlayerHealth>();
-        health.TakeDamage(150f, OwnerClientId, "HAMR");
+        var health = hit.collider.GetComponentInParent<PlayerHealth>();
+        if (health != null)
+            health.TakeDamage(150f, OwnerClientId, "HAMR");
     }
 }
