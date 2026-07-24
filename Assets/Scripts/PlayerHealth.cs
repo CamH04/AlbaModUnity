@@ -5,12 +5,11 @@ using System.Collections;
 public class PlayerHealth : NetworkBehaviour {
     [Header("Settings")]
     public float maxHealth = 100f;
-    public float respawnDelay = 3f;
+    public float respawnDelay = 5f;
 
     private ulong _lastDamageSourceClientId;
     private string _lastDamageWeaponName = "Unknown";
 
-    // Synced to all clients automatically
     private NetworkVariable<float> _health = new NetworkVariable<float>(
         100f,
         NetworkVariableReadPermission.Everyone,
@@ -18,9 +17,7 @@ public class PlayerHealth : NetworkBehaviour {
     );
 
     private bool _isDead = false;
-
-    // Hook into this from UI scripts to update health bar
-    public event System.Action<float, float> OnHealthChanged; // current, max
+    public event System.Action<float, float> OnHealthChanged;
     public event System.Action OnDied;
     public event System.Action OnRespawned;
 
@@ -134,5 +131,15 @@ public class PlayerHealth : NetworkBehaviour {
     [ServerRpc(RequireOwnership = false)]
     public void ResetHealthServerRpc() {
         _health.Value = maxHealth;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void KillBindServerRpc(ServerRpcParams rpcParams = default) {
+        if (rpcParams.Receive.SenderClientId != OwnerClientId) return;
+        if (_isDead) return;
+        if (KillFeedManager.Instance != null)
+            KillFeedManager.Instance.ReportKill(OwnerClientId, OwnerClientId, "Killbind");
+
+        _health.Value = 0f;
     }
 }

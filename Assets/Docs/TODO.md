@@ -11,15 +11,17 @@
 + + SMG (vector) 
 + + Throwing Knife 1 shot body
 + + Half Satoichi 
-+ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit)
++ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp)
++ + Nitro cell from R6 but at mach 480912
 
 + Maps
 + + Titanfall 2 type 1v1 map
 + + Penshaw monument map (with worm killbox) 
 + + Forest Map with Fog of war, a collection of high up treehouses (decrpit, rotten)
++ + Map of stoneblock 2 base
 
++ Rail grinding????
 + Playlist
-+ Pause Menu
 + Settings
 + Random Map Select (spawns map prefab from list of prefabs) 
 + Stats (Locally Hosted)
