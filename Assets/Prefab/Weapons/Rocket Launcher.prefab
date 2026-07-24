@@ -35,6 +35,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6862812874729162448}
+  - {fileID: 6030294241828964218}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8184882648492549258
@@ -133,7 +134,7 @@ MonoBehaviour:
   maxAmmo: 20
   currentAmmo: 0
   reloadTime: 1.5
-  muzzle: {fileID: 0}
+  muzzle: {fileID: 6030294241828964218}
   fireSound: {fileID: 8300000, guid: 23d6211cf4393eb4385e78a1a4d5b466, type: 3}
   fireVolume: 0.1
   rocketPrefab: {fileID: 7211110670094490706, guid: b2589f7c3bb9b1747b95e4812128b0ea, type: 3}
@@ -235,6 +236,37 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &3073760856466450531
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6030294241828964218}
+  m_Layer: 0
+  m_Name: Mussle(Aawrf)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6030294241828964218
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3073760856466450531}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.019, y: 0, z: 1.078}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4986091749671786775}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6413937372268776352
 GameObject:
   m_ObjectHideFlags: 0

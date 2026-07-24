@@ -18,8 +18,6 @@
 + + Penshaw monument map (with worm killbox) 
 + + Forest Map with Fog of war, a collection of high up treehouses (decrpit, rotten)
 
-
-+ Pause Menu
 + Playlist
 + Pause Menu
 + Settings
@@ -32,6 +30,7 @@
 
 
 # Done
++ Pause Menu
 + Datamosh death screen
 + Killfeed
 + Chain Lash

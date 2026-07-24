@@ -112,6 +112,7 @@ public class NetworkBootstrapper : MonoBehaviour {
         await LobbyManager.Instance.LeaveLobby();
         if (NetworkManager.Singleton != null)
             NetworkManager.Singleton.Shutdown();
+        _spawningInProgress = false;
         SceneManager.LoadScene(lobbySceneName);
     }
 

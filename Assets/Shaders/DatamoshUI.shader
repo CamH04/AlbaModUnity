@@ -1,17 +1,16 @@
 Shader "UI/DatamoshUI"
 {
     Properties
-{
-    [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
+    {
+        [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
 
-    _MoshAmount ("Datamosh Amount", Range(0,1)) = 0
+        _MoshAmount ("Datamosh Amount", Range(0,1)) = 0
 
-    _PixelSize ("Pixel Block Size", Range(1,100)) = 30
-    _GlitchStrength ("Glitch Strength", Range(0,0.1)) = 0.03
+        _PixelSize ("Pixel Block Size", Range(1,100)) = 30
+        _GlitchStrength ("Glitch Strength", Range(0,0.1)) = 0.03
 
-    _CorruptionDirection ("Corruption Direction", Range(0,1)) = 0
-    _CorruptionSoftness ("Corruption Edge Softness", Range(0.01,0.5)) = 0.05
-}
+        _CorruptionSoftness ("Corruption Edge Softness", Range(0.01,0.5)) = 0.05
+    }
 
     SubShader
     {
@@ -56,8 +55,6 @@ Shader "UI/DatamoshUI"
             float _MoshAmount;
             float _PixelSize;
             float _GlitchStrength;
-
-            float _CorruptionDirection;
             float _CorruptionSoftness;
 
             v2f vert(appdata_t v)
@@ -71,71 +68,113 @@ Shader "UI/DatamoshUI"
                 return o;
             }
 
-
-            float random(float2 seed)
+            float random(float2 p)
             {
-                return frac(sin(dot(seed, float2(12.9898,78.233))) * 43758.5453);
+                return frac(sin(dot(p,float2(12.9898,78.233))) * 43758.5453);
             }
 
+            // Smooth value noise
+            float noise(float2 p)
+            {
+                float2 i = floor(p);
+                float2 f = frac(p);
+
+                float a = random(i);
+                float b = random(i + float2(1,0));
+                float c = random(i + float2(0,1));
+                float d = random(i + float2(1,1));
+
+                f = f * f * (3.0 - 2.0 * f);
+
+                return lerp(
+                    lerp(a,b,f.x),
+                    lerp(c,d,f.x),
+                    f.y
+                );
+            }
 
             fixed4 frag(v2f i) : SV_Target
             {
                 float2 uv = i.uv;
+
+                //----------------------------------------
+                // Animated warp field
+                //----------------------------------------
+
+                float t = _Time.y * 0.25;
+
+                float2 warp;
+
+                warp.x = noise(uv * 5 + float2(t,0));
+                warp.y = noise(uv * 5 + float2(31.7,t));
+
+                warp = (warp - 0.5) * 0.12;
+
+                float2 warpedUV = uv + warp;
+
+                //----------------------------------------
+                // Organic corruption front
+                //----------------------------------------
+
                 float edgeDistance = min(
-                    min(uv.x, 1 - uv.x),
-                    min(uv.y, 1 - uv.y)
+                    min(warpedUV.x, 1 - warpedUV.x),
+                    min(warpedUV.y, 1 - warpedUV.y)
                 );
 
-
-                // Expand corruption inward from edges
                 float corruption = 1 - smoothstep(
                     _MoshAmount * 0.5,
                     (_MoshAmount * 0.5) + _CorruptionSoftness,
                     edgeDistance
                 );
 
+                //----------------------------------------
+                // Datamosh blocks follow corruption
+                //----------------------------------------
 
-                // Pixel block coordinates
-                float2 blocks = floor(uv * _PixelSize);
+                float2 blocks = floor(warpedUV * _PixelSize);
 
-                float glitchNoise = random(blocks + floor(_Time.y * 10));
+                float glitchNoise =
+                    random(blocks + floor(_Time.y * 12));
 
-
+                //----------------------------------------
                 // Horizontal tearing
-                float tear = step(0.85, glitchNoise)
+                //----------------------------------------
+
+                float tear =
+                    step(0.82, glitchNoise)
                     * _GlitchStrength
                     * corruption;
 
+                warpedUV.x += tear;
 
-                uv.x += tear;
+                //----------------------------------------
+                // RGB separation
+                //----------------------------------------
 
-
-                // RGB channel separation
-                float rgbOffset = corruption * 0.02;
-
+                float rgbOffset =
+                    corruption * 0.02;
 
                 float r = tex2D(
                     _MainTex,
-                    uv + float2(rgbOffset,0)
+                    warpedUV + float2(rgbOffset,0)
                 ).r;
 
                 float g = tex2D(
                     _MainTex,
-                    uv
+                    warpedUV
                 ).g;
 
                 float b = tex2D(
                     _MainTex,
-                    uv - float2(rgbOffset,0)
+                    warpedUV - float2(rgbOffset,0)
                 ).b;
 
-
                 fixed4 col;
+
                 col.r = r;
                 col.g = g;
                 col.b = b;
-                col.a = tex2D(_MainTex, uv).a * i.color.a;
-
+                col.a = tex2D(_MainTex, warpedUV).a * i.color.a;
 
                 return col;
             }
