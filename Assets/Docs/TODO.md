@@ -7,12 +7,12 @@
 # To Add
 
 + Guns
++ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp)
++ + Nitro cell from R6 but at mach 480912
 + + Shotgun (nockgun) 1 shot at close range
 + + SMG (vector) 
 + + Throwing Knife 1 shot body
 + + Half Satoichi 
-+ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp)
-+ + Nitro cell from R6 but at mach 480912
 
 + Maps
 + + Titanfall 2 type 1v1 map
@@ -32,6 +32,7 @@
 
 
 # Done
++ Killbind
 + Pause Menu
 + Datamosh death screen
 + Killfeed
