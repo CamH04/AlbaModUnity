@@ -15,6 +15,20 @@ public class RocketProjectile : ProjectileBase {
 
     private bool _hasExploded = false;
 
+    public virtual void Initialise(ulong shooterId) {
+        shooterClientId = shooterId;
+        spawnTime = Time.time;
+
+        // Apply *10 mode multipliers
+        if (GameModeSettings.Instance != null && GameModeSettings.Instance.IsTenXMode.Value) {
+            directHitDamage *= 10f;
+            splashDamage *= 10f;
+            knockbackForce *= 10f;
+            speed *= 3f;   // 3x speed so rockets actually reach targets
+            splashRadius *= 2f;   // bigger boom radius
+        }
+    }
+
     protected override void OnHit(Collider other, Vector3 hitPoint, Vector3 hitNormal) {
         if (_hasExploded) return;
 

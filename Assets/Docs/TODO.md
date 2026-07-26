@@ -1,11 +1,11 @@
 # Link To Bugs Trello Board: https://trello.com/b/vTTwVn4M
 
 # Changes To Do
++ x10 gamemode checkbox added but fix it, not applying i think (havent testeted on client) nut make firerate 10x as well
 + Make respawn 5 seconds
 + Overhall netcode before playtest
 
 # To Add
-
 + Guns
 + + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp)
 + + Nitro cell from R6 but at mach 480912

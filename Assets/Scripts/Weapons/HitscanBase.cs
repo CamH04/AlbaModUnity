@@ -30,8 +30,14 @@ public abstract class HitscanBase : WeaponBase {
 
         PlayerHealth health = hit.collider.GetComponentInParent<PlayerHealth>();
 
-        if (health != null && !health.IsDead)
+        if (health != null && !health.IsDead) {
+            float finalDamage = damage;
+            if (GameModeSettings.Instance != null && GameModeSettings.Instance.IsTenXMode.Value)
+                finalDamage *= 10f;
+
+            health.TakeDamage(finalDamage, 0, "HAMR");
             OnPlayerHit(health, hit);
+        }
 
         SpawnImpactClientRpc(hit.point, hit.normal);
         OnHit(hit);

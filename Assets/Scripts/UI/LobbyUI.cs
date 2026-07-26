@@ -3,8 +3,13 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.Netcode;
 
 public class LobbyUI : MonoBehaviour {
+    [Header("Game Mode")]
+    public UnityEngine.UI.Toggle tenXToggle;
+    public TMPro.TextMeshProUGUI tenXLabel;
+
     [Header("Panels")]
     public GameObject mainPanel;
     public GameObject lobbyPanel;
@@ -31,7 +36,20 @@ public class LobbyUI : MonoBehaviour {
         leaveButton.onClick.AddListener(OnLeave);
         startButton.onClick.AddListener(OnStart);
 
+        bool isHost = NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost;
+        if (tenXToggle != null) tenXToggle.gameObject.SetActive(isHost);
+        if (tenXLabel != null) tenXLabel.gameObject.SetActive(isHost);
+        if (tenXToggle != null)
+            tenXToggle.onValueChanged.AddListener(OnTenXToggled);
+
         ShowMain();
+    }
+    
+    void OnTenXToggled(bool value) {
+        if (!NetworkManager.Singleton.IsHost) return;
+        if (GameModeSettings.Instance != null)
+            GameModeSettings.Instance.SetTenXMode(value);
+        Debug.Log($"*10 mode: {value}");
     }
 
     async void OnHost() {

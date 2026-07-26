@@ -51,6 +51,11 @@ public abstract class WeaponBase : NetworkBehaviour {
         // Waiting a frame guarantees that registration has completed.
         StartCoroutine(ResolveFollowTargetDelayed());
 
+        currentAmmo = maxAmmo;
+        _playerController = GetComponentInParent<PlayerController>();
+        if (!IsOwner) enabled = false;
+        ApplyGameMode();
+
         // NOTE: we no longer disable this behaviour for non-owners.
         // LateUpdate() below needs to keep running on every client so the
         // weapon visually follows the holder everywhere, not just for the
@@ -124,6 +129,24 @@ public abstract class WeaponBase : NetworkBehaviour {
         transform.rotation = _playerCamera != null
             ? _playerCamera.transform.rotation
             : _followTarget.rotation;
+    }
+
+    // Add to WeaponBase — called after spawn and whenever mode changes
+    public virtual void ApplyGameMode() {
+        if (GameModeSettings.Instance == null) return;
+        if (!GameModeSettings.Instance.IsTenXMode.Value) return;
+
+        // Subscribe to future changes too
+        GameModeSettings.Instance.IsTenXMode.OnValueChanged += OnGameModeChanged;
+    }
+
+    protected virtual void OnGameModeChanged(bool previous, bool current) {
+        ApplyGameMode();
+    }
+
+    public override void OnNetworkDespawn() {
+        if (GameModeSettings.Instance != null)
+            GameModeSettings.Instance.IsTenXMode.OnValueChanged -= OnGameModeChanged;
     }
 
     protected abstract void HandleInput();
