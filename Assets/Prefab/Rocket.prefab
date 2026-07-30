@@ -87,6 +87,8 @@ MonoBehaviour:
   knockbackForce: 18
   selfDamageMultiplier: 0.5
   explosionEffectPrefab: {fileID: 0}
+  hitSound: {fileID: 8300000, guid: 02c3301331d5a57499753a7c06200a0b, type: 3}
+  hitVolume: 0.388
 --- !u!114 &-6817657681323687951
 MonoBehaviour:
   m_ObjectHideFlags: 0

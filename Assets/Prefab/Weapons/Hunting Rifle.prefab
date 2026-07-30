@@ -216,6 +216,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 9
   impactEffect: {fileID: 0}
+  hitSound: {fileID: 8300000, guid: 02c3301331d5a57499753a7c06200a0b, type: 3}
+  hitVolume: 1
   fireSound: {fileID: 8300000, guid: 56281e3a7e4fdaa45929dbf3b804b086, type: 3}
   fireVolume: 0.225
   scopeOverlay: {fileID: 8346727702858629275}

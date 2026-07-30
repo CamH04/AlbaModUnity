@@ -10,13 +10,16 @@ public abstract class HitscanBase : WeaponBase {
     [Header("Effects")]
     public GameObject impactEffect;
 
+    [Header("Hit Sound")]
+    public AudioClip hitSound;
+    [Range(0f, 1f)] public float hitVolume = 1f;
+
+    private AudioSource _audioSource;
+
     protected override void SpawnProjectile(Vector3 origin, Vector3 direction) {
-        // Only runs on server — called by FireServerRpc in WeaponBase
         FireHitscan(origin, direction);
     }
 
-    // Override WeaponBase's ServerRpc to remove ownership requirement
-    // so clients can call it on a server-owned weapon object
     [ServerRpc(RequireOwnership = false)]
     protected override void FireServerRpc(Vector3 position, Vector3 direction) {
         SpawnProjectile(position, direction);
@@ -35,8 +38,15 @@ public abstract class HitscanBase : WeaponBase {
             if (GameModeSettings.Instance != null && GameModeSettings.Instance.IsTenXMode.Value)
                 finalDamage *= 10f;
 
-            health.TakeDamage(finalDamage, 0, "HAMR");
+            health.TakeDamage(finalDamage, OwnerClientId, weaponName);
             OnPlayerHit(health, hit);
+
+            // Send hit sound to the shooter only
+            PlayHitSoundClientRpc(new ClientRpcParams {
+                Send = new ClientRpcSendParams {
+                    TargetClientIds = new[] { OwnerClientId }
+                }
+            });
         }
 
         SpawnImpactClientRpc(hit.point, hit.normal);
@@ -50,11 +60,24 @@ public abstract class HitscanBase : WeaponBase {
     protected virtual void OnHit(RaycastHit hit) { }
 
     [ClientRpc]
+    void PlayHitSoundClientRpc(ClientRpcParams rpcParams = default) {
+        if (hitSound == null) return;
+
+        // Lazy init AudioSource
+        if (_audioSource == null) {
+            _audioSource = GetComponent<AudioSource>();
+            if (_audioSource == null)
+                _audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        _audioSource.PlayOneShot(hitSound, hitVolume);
+    }
+
+    [ClientRpc]
     void SpawnImpactClientRpc(Vector3 position, Vector3 normal) {
         if (impactEffect == null) return;
 
-        var fx = Instantiate(impactEffect, position,
-            Quaternion.LookRotation(normal));
+        var fx = Instantiate(impactEffect, position, Quaternion.LookRotation(normal));
         Destroy(fx, 2f);
     }
 }

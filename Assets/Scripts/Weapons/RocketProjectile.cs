@@ -43,39 +43,67 @@ public class RocketProjectile : ProjectileBase {
     void Explode(Vector3 point, Vector3 normal, PlayerHealth directHit) {
         _hasExploded = true;
 
-        // Direct hit
+        bool anyoneHit = false;
+
         if (directHit != null && !directHit.IsDead) {
             directHit.TakeDamage(directHitDamage, shooterClientId, "Rocket Launcher");
             ApplyKnockback(directHit.gameObject, point, 1f);
+            anyoneHit = true;
         }
 
-        // Splash — explicitly exclude shooter from direct hit AND from self-splash
-        // unless you want self-damage (TF2 style does include self-splash)
         var colliders = Physics.OverlapSphere(point, splashRadius, hitMask);
-        Debug.Log($"Overlap sphere found {colliders.Length} colliders");
         var alreadyHit = new System.Collections.Generic.HashSet<PlayerHealth>();
 
         foreach (var col in colliders) {
             var health = col.GetComponentInParent<PlayerHealth>();
             if (health == null || health.IsDead) continue;
             if (directHit != null && health == directHit) continue;
-            if (!alreadyHit.Add(health)) continue; // skip if already processed this player
+            if (!alreadyHit.Add(health)) continue;
 
             float dist = Vector3.Distance(point, col.transform.position);
             float falloff = Mathf.Clamp01(1f - dist / splashRadius);
 
             if (falloff > 0.01f) {
-                float damage = splashDamage * falloff;
+                float dmg = splashDamage * falloff;
                 if (health.OwnerClientId == shooterClientId)
-                    damage *= selfDamageMultiplier;
+                    dmg *= selfDamageMultiplier;
+                else
+                    anyoneHit = true;
 
-                health.TakeDamage(damage * selfDamageMultiplier, shooterClientId, "Rocket Launcher");
+                health.TakeDamage(dmg, shooterClientId, "Rocket Launcher");
                 ApplyKnockback(health.gameObject, point, falloff);
             }
         }
 
+        // Play hit sound on shooter's client if anyone else was hit
+        if (anyoneHit) {
+            PlayHitSoundClientRpc(new ClientRpcParams {
+                Send = new ClientRpcSendParams {
+                    TargetClientIds = new[] { shooterClientId }
+                }
+            });
+        }
+
         SpawnExplosionClientRpc(point, normal);
         NetworkObject.Despawn();
+    }
+
+    [Header("Hit Sound")]
+    public AudioClip hitSound;
+    [Range(0f, 1f)] public float hitVolume = 1f;
+    private AudioSource _hitAudioSource;
+
+    [ClientRpc]
+    void PlayHitSoundClientRpc(ClientRpcParams rpcParams = default) {
+        if (hitSound == null) return;
+
+        if (_hitAudioSource == null) {
+            _hitAudioSource = GetComponent<AudioSource>();
+            if (_hitAudioSource == null)
+                _hitAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        _hitAudioSource.PlayOneShot(hitSound, hitVolume);
     }
 
     void ApplyKnockback(GameObject target, Vector3 explosionPoint, float falloff) {
