@@ -1061,7 +1061,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &287098840
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2277,7 +2277,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &895877774
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4477,10 +4477,12 @@ MonoBehaviour:
 
     Art: Alba, thatrobin3001
 
-    Models: ccv4, Alba
+    Voice Actors: Nyyroe, Alba
 
-    Sketchfab Models:
-    A3st. TastyTony
+    Models:
+    ccv4, Alba
+
+    Sketchfab Models: A3st. TastyTony
 
 '
   m_isRightToLeft: 0
@@ -5129,7 +5131,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 729e0c1b4b39f504ab7a2dc5acc82f80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   DefaultCharacterIndex: 0
 --- !u!1 &1796486558
 GameObject:
