@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 500140fa46e635e47b61497e70feb7d4, type: 3}
   m_Name: DevCharacter
   m_EditorClassIdentifier: 
-  characterName: Dev
+  characterName: Unknown
   characterPortrait: {fileID: 21300000, guid: 41da261dc589d064abf7b8f63352ab7c, type: 3}
   characterDescription: Just the dev
   characterModelPrefab: {fileID: 6192593192548946801, guid: 46e0fbd2cb1768c468f96f36db98a0ff, type: 3}
   commonDeathLines:
-  - {fileID: 8300000, guid: 7e1de56e450e9b5449b39d8fc5576234, type: 3}
+  - {fileID: 8300000, guid: 4b4db006b2d3e9d4db9f6af907667c49, type: 3}
+  - {fileID: 8300000, guid: 931b3e061b2d35b42a83af32299a0ebe, type: 3}
+  - {fileID: 8300000, guid: 14f28862c30fade44a200d350e9c2c80, type: 3}
   rareDeathLines:
-  - {fileID: 8300000, guid: 04ae50f81a7ee3543aad6661c7d04f22, type: 3}
-  rareLineChance: 0.15
-  deathLineVolume: 1
+  - {fileID: 8300000, guid: 5ef96f659a947d94fbbb0b6aee009a3d, type: 3}
+  rareLineChance: 0.365
+  deathLineVolume: 0.172
