@@ -20,6 +20,13 @@
 + + Forest Map with Fog of war, a collection of high up treehouses (decrpit, rotten)
 + + Map of stoneblock 2 base
 
++ Characters
++ + Finish Luna
++ + unkown 
++ + faceless
++ + north east miner bloke
+
+
 + Rail grinding????
 + Playlist
 + Settings
