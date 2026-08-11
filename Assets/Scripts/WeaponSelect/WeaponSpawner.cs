@@ -1,4 +1,5 @@
 ﻿using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 public class WeaponSpawner : NetworkBehaviour {
@@ -7,17 +8,13 @@ public class WeaponSpawner : NetworkBehaviour {
     public CharacterRegistry characterRegistry;
 
     [Header("References")]
-    [Tooltip("Where the weapon should appear — e.g. a camera child or hand socket")]
     public Transform weaponHolder;
-
-    [Tooltip("Where the character model spawns — usually the player root or hip bone")]
     public Transform modelHolder;
 
     private GameObject _currentWeapon;
     private GameObject _currentModel;
 
     public override void OnNetworkSpawn() {
-        // Server spawns the networked weapon
         if (IsServer) {
             int weaponIndex = PlayerWeaponSelection.Instance != null
                 ? PlayerWeaponSelection.Instance.GetWeaponIndex(OwnerClientId)
@@ -25,7 +22,6 @@ public class WeaponSpawner : NetworkBehaviour {
             SpawnWeapon(weaponIndex);
         }
 
-        // Every client spawns the character model locally (purely visual)
         int charIndex = PlayerCharacterSelection.Instance != null
             ? PlayerCharacterSelection.Instance.GetCharacterIndex(OwnerClientId)
             : 0;
@@ -47,8 +43,8 @@ public class WeaponSpawner : NetworkBehaviour {
 
         _currentWeapon = Instantiate(
             entry.weaponPrefab,
-            Vector3.zero,
-            Quaternion.identity
+            weaponHolder != null ? weaponHolder.position : transform.position,
+            weaponHolder != null ? weaponHolder.rotation : transform.rotation
         );
 
         var netObj = _currentWeapon.GetComponent<NetworkObject>();
@@ -60,7 +56,38 @@ public class WeaponSpawner : NetworkBehaviour {
         if (weapon != null)
             weapon.SetCamera(playerCamera);
 
-        Debug.Log($"Spawned {entry.weaponName} for client {OwnerClientId} | camera: {(playerCamera != null ? playerCamera.name : "NULL")}");
+        // Tell all clients to attach the weapon visually to this player
+        AttachWeaponClientRpc(netObj.NetworkObjectId);
+
+        Debug.Log($"Spawned {entry.weaponName} for client {OwnerClientId}");
+    }
+
+    [ClientRpc]
+    void AttachWeaponClientRpc(ulong weaponNetworkObjectId) {
+        StartCoroutine(AttachWeaponWhenReady(weaponNetworkObjectId));
+    }
+
+    System.Collections.IEnumerator AttachWeaponWhenReady(ulong weaponNetworkObjectId) {
+        // Wait until the weapon NetworkObject is registered on this client
+        NetworkObject weaponNetObj = null;
+        float timeout = 5f;
+        float elapsed = 0f;
+
+        while (weaponNetObj == null && elapsed < timeout) {
+            NetworkManager.Singleton.SpawnManager.SpawnedObjects
+                .TryGetValue(weaponNetworkObjectId, out weaponNetObj);
+            yield return null;
+            elapsed += Time.deltaTime;
+        }
+
+        if (weaponNetObj == null) {
+            Debug.LogError($"WeaponSpawner: timed out waiting for weapon {weaponNetworkObjectId}");
+            yield break;
+        }
+
+        // Store reference so LateUpdate can track it
+        _currentWeapon = weaponNetObj.gameObject;
+        Debug.Log($"Client attached weapon {_currentWeapon.name} to player {OwnerClientId}");
     }
 
     // ── Character model ───────────────────────────────────────────────────────
@@ -71,7 +98,7 @@ public class WeaponSpawner : NetworkBehaviour {
 
         var def = characterRegistry.characters[index];
         if (def.characterModelPrefab == null) {
-            Debug.LogWarning($"WeaponSpawner: character {def.characterName} has no model prefab assigned!");
+            Debug.LogWarning($"Character {def.characterName} has no model prefab!");
             return;
         }
 
@@ -80,20 +107,17 @@ public class WeaponSpawner : NetworkBehaviour {
 
         var holder = modelHolder != null ? modelHolder : transform;
 
-        // Plain Instantiate — no NetworkObject, purely visual on each client
         _currentModel = Instantiate(
             def.characterModelPrefab,
             holder.position,
             holder.rotation,
-            holder          // parented locally so it follows the player
+            holder
         );
 
-        // Hide the model for the local owner (first-person view)
-        // but keep it visible for everyone else
         if (IsOwner)
             SetModelVisibility(false);
 
-        Debug.Log($"Spawned model {def.characterName} for client {OwnerClientId} | isOwner: {IsOwner}");
+        Debug.Log($"Spawned model {def.characterName} for client {OwnerClientId}");
     }
 
     void SetModelVisibility(bool visible) {
@@ -105,17 +129,15 @@ public class WeaponSpawner : NetworkBehaviour {
     // ── Weapon position tracking ──────────────────────────────────────────────
 
     void LateUpdate() {
-        TrackWeaponToHolder();
-    }
-
-    void TrackWeaponToHolder() {
         if (_currentWeapon == null) return;
         if (weaponHolder == null) return;
 
-        // Move and rotate the weapon to match the holder every frame
-        // LateUpdate ensures this runs after all movement and camera updates
-        _currentWeapon.transform.position = weaponHolder.position;
-        _currentWeapon.transform.rotation = weaponHolder.rotation;
+        // Only the owner drives the weapon position
+        // NetworkTransform on the weapon replicates it to everyone else
+        if (IsOwner) {
+            _currentWeapon.transform.position = weaponHolder.position;
+            _currentWeapon.transform.rotation = weaponHolder.rotation;
+        }
     }
 
     public override void OnNetworkDespawn() {
