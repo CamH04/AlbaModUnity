@@ -18,7 +18,8 @@
 + + Titanfall 2 type 1v1 map
 + + Penshaw monument map (with worm killbox) 
 + + Forest Map with Fog of war, a collection of high up treehouses (decrpit, rotten)
-+ + Map of stoneblock 2 base
++ + Aldershot Gallaries
++ + The gallary , loads of toetms with peoples art on it in frames
 
 + Characters
 + + Finish Luna
