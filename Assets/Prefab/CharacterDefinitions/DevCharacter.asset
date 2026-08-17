@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: Unknown
   characterPortrait: {fileID: 21300000, guid: 41da261dc589d064abf7b8f63352ab7c, type: 3}
-  characterDescription: Just the dev
+  characterDescription: '[Redacted]'
   characterModelPrefab: {fileID: 6192593192548946801, guid: 46e0fbd2cb1768c468f96f36db98a0ff, type: 3}
   commonDeathLines:
   - {fileID: 8300000, guid: 4b4db006b2d3e9d4db9f6af907667c49, type: 3}
@@ -23,4 +23,4 @@ MonoBehaviour:
   rareDeathLines:
   - {fileID: 8300000, guid: 5ef96f659a947d94fbbb0b6aee009a3d, type: 3}
   rareLineChance: 0.365
-  deathLineVolume: 0.172
+  deathLineVolume: 0.081
