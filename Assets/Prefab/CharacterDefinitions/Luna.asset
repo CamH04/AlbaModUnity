@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 500140fa46e635e47b61497e70feb7d4, type: 3}
+  m_Name: Luna
+  m_EditorClassIdentifier: 
+  characterName: Luna
+  characterPortrait: {fileID: 21300000, guid: a2303c8a40d959c47a825238ee2cf522, type: 3}
+  characterDescription: "Luna was the first Nightingale, experienced at the job and
+    dejected from the world she\u2019s in."
+  characterModelPrefab: {fileID: 6192593192548946801, guid: 46e0fbd2cb1768c468f96f36db98a0ff, type: 3}
+  commonDeathLines:
+  - {fileID: 8300000, guid: dad336529b2dbca4392b90f90fb4b4fd, type: 3}
+  - {fileID: 8300000, guid: a7cdf784fae16834ca9c806efe0b4ba9, type: 3}
+  - {fileID: 8300000, guid: 29d2c2e3ce9da2b43895332e61490d56, type: 3}
+  - {fileID: 8300000, guid: b2411035dd53f2742b8730710e97e908, type: 3}
+  - {fileID: 8300000, guid: b705f302af2a0304bbdbc41b7016a99e, type: 3}
+  rareDeathLines:
+  - {fileID: 8300000, guid: 3874f4a95a8a15c40841dd15a2fdb394, type: 3}
+  rareLineChance: 0.15
+  deathLineVolume: 1
