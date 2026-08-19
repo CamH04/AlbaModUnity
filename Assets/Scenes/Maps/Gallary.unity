@@ -127,18 +127,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 562368914670607303, guid: b0d05d055e428764896317191e97a6c0, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 3.005
-      objectReference: {fileID: 0}
     - target: {fileID: 4852611685990578216, guid: b0d05d055e428764896317191e97a6c0, type: 3}
       propertyPath: m_Name
       value: GallaryMap
       objectReference: {fileID: 0}
-    - target: {fileID: 7506893460802769912, guid: b0d05d055e428764896317191e97a6c0, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: fb4ac33f22793294cac6d545f634ccf9, type: 2}
     - target: {fileID: 7621149711151238008, guid: b0d05d055e428764896317191e97a6c0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -178,14 +170,6 @@ PrefabInstance:
     - target: {fileID: 7621149711151238008, guid: b0d05d055e428764896317191e97a6c0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8023241240150763454, guid: b0d05d055e428764896317191e97a6c0, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 71.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 8023241240150763454, guid: b0d05d055e428764896317191e97a6c0, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 97.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

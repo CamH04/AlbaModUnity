@@ -1,33 +1,37 @@
 using UnityEngine;
 
+[ExecuteAlways]
 public class ImageProjector : MonoBehaviour {
     [SerializeField] private Texture2D image;
     [SerializeField] private Renderer targetPlane;
 
-    private Material materialInstance;
+    private MaterialPropertyBlock propertyBlock;
 
-    private void Awake() {
-        if (targetPlane == null)
-            targetPlane = GetComponentInChildren<Renderer>();
-
-        materialInstance = targetPlane.material;
-        UpdateImage();
+    private void OnEnable() {
+        ApplyImage();
     }
 
     private void OnValidate() {
+        ApplyImage();
+    }
+
+    private void ApplyImage() {
         if (targetPlane == null)
             targetPlane = GetComponentInChildren<Renderer>();
 
-        if (targetPlane != null) {
-            materialInstance = targetPlane.sharedMaterial;
-            UpdateImage();
-        }
-    }
-
-    private void UpdateImage() {
-        if (materialInstance == null || image == null)
+        if (targetPlane == null)
             return;
 
-        materialInstance.mainTexture = image;
+        if (propertyBlock == null)
+            propertyBlock = new MaterialPropertyBlock();
+
+        targetPlane.GetPropertyBlock(propertyBlock);
+
+        if (image != null) {
+            propertyBlock.SetTexture("_MainTex", image);
+            propertyBlock.SetTexture("_BaseMap", image);
+        }
+
+        targetPlane.SetPropertyBlock(propertyBlock);
     }
 }
