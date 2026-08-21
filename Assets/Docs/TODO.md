@@ -6,6 +6,9 @@
 + Overhall netcode before playtest
 
 # To Add
+
++ Add a random line at the top of main menu like minecraft
+
 + Guns
 + + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp)
 + + Nitro cell from R6 but at mach 480912
