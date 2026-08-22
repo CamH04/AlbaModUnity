@@ -116,7 +116,7 @@ public class Abilities : MonoBehaviour {
             _isGrappling = true;
             _ropeLength = Vector3.Distance(transform.position, _grapplePoint);
             _grappleCooldownTimer = grappleCooldown;
-
+            LocalStatsTracker.Instance?.OnGrappleStarted(transform);
             if (ropeRenderer != null)
                 ropeRenderer.enabled = true;
         }
@@ -174,6 +174,7 @@ public class Abilities : MonoBehaviour {
 
         if (ropeRenderer != null)
             ropeRenderer.enabled = false;
+        LocalStatsTracker.Instance?.OnGrappleEnded();
     }
 
     void UpdateRopeVisual() {
@@ -195,12 +196,12 @@ public class Abilities : MonoBehaviour {
         motor.maxGroundSpeed = _baseMaxGroundSpeed * stimSpeedMult;
         motor.airAccelerate = _baseAirAccelerate * stimAirAccelMult;
         motor.jumpForce = _baseJumpForce * stimJumpMult;
-
         // FOV boost
         if (_camController != null)
             _camController.baseFOV += stimFOVAdd;
 
         Debug.Log("Stim activated");
+        LocalStatsTracker.Instance?.OnStimStarted();
     }
 
     void EndStim() {
@@ -217,6 +218,7 @@ public class Abilities : MonoBehaviour {
             _camController.baseFOV -= stimFOVAdd;
 
         Debug.Log("Stim ended");
+        LocalStatsTracker.Instance?.OnStimEnded();
     }
 
     // ?? Gizmos ?????????????????????????????????????????????????

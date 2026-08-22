@@ -6,7 +6,7 @@
 + Overhall netcode before playtest
 
 # To Add
-
++ Add stats page on main menu
 + Add a random line at the top of main menu like minecraft
 
 + Guns

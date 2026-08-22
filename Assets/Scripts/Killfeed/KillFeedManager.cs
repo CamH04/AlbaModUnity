@@ -27,7 +27,7 @@ public class KillFeedManager : NetworkBehaviour {
 
     [ClientRpc]
     void BroadcastKillClientRpc(string killerName, string victimName,
-        string weaponName, ulong killerClientId, ulong victimClientId) {
+    string weaponName, ulong killerClientId, ulong victimClientId) {
         KillFeedUI.Instance?.AddEntry(new KillFeedEntry {
             killerName = killerName,
             victimName = victimName,
@@ -35,5 +35,10 @@ public class KillFeedManager : NetworkBehaviour {
             killerClientId = killerClientId,
             victimClientId = victimClientId
         });
+        if (killerClientId == NetworkManager.Singleton.LocalClientId
+            && killerClientId != victimClientId)
+        {
+            LocalStatsTracker.Instance?.RegisterKill(weaponName);
+        }
     }
 }
