@@ -32,32 +32,9 @@
 
 
 + Rail grinding????
-+ Playlist
 + Settings
-+ Random Map Select (spawns map prefab from list of prefabs) 
-+ Stats (Locally Hosted)
++ Random Map Select (spawns map prefab from list of prefabs)
 + Chat
 =============Then Playtest=============
 + Weapon inspects
 + Achivments
-
-
-# Done
-+ Killbind
-+ Pause Menu
-+ Datamosh death screen
-+ Killfeed
-+ Chain Lash
-+ Updated Main Menu
-+ Sniper (intervention or kraber) 1 shot body
-+ Rocket Launcher (now applies knockback on hit)
-+ Respawn
-+ Damage System
-+ Castle Ruins / Chapel
-+ Lobby Selector
-+ Multiplayer
-+ Grapple Hook
-+ Stim
-+ Wallriding (with double jump)
-+ Slide
-+ Controllerable Character

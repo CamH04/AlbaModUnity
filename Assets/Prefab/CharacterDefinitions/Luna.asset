@@ -26,4 +26,4 @@ MonoBehaviour:
   rareDeathLines:
   - {fileID: 8300000, guid: 3874f4a95a8a15c40841dd15a2fdb394, type: 3}
   rareLineChance: 0.15
-  deathLineVolume: 1
+  deathLineVolume: 0.406
