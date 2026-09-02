@@ -6,11 +6,14 @@
 + Overhall netcode before playtest
 
 # To Add
+
++ Home Base, arcade cabinit where you can play nightingale
+
 + Add dmg taken and dealt to stats
-+ Add a random line at the top of main menu like minecraft
++ Random Map Select (spawns map prefab from list of prefabs)
 
 + Guns
-+ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp)
++ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp, inceasre run speed and jump height)
 + + Nitro cell from R6 but at mach 480912
 + + Shotgun (nockgun) 1 shot at close range
 + + SMG (vector) 
@@ -18,11 +21,9 @@
 + + Half Satoichi 
 
 + Maps
-+ + Titanfall 2 type 1v1 map
 + + Penshaw monument map (with worm killbox) 
 + + Forest Map with Fog of war, a collection of high up treehouses (decrpit, rotten)
 + + Aldershot Gallaries
-+ + The gallary , loads of toetms with peoples art on it in frames
 
 + Characters
 + + Finish Luna
@@ -33,7 +34,6 @@
 
 + Rail grinding????
 + Settings
-+ Random Map Select (spawns map prefab from list of prefabs)
 + Chat
 =============Then Playtest=============
 + Weapon inspects
