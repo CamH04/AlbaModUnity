@@ -136,6 +136,31 @@ public class NetworkBootstrapper : MonoBehaviour {
         yield return null;
         yield return null;
 
+        // Extra wait to ensure MapSpawner.Start() has run
+        // and all spawn point GameObjects are registered in the scene
+        yield return null;
+
+        RefreshSpawnPoints();
+
+        if (_spawnPoints == null || _spawnPoints.Length == 0) {
+            Debug.LogWarning("No spawn points found after map load — retrying...");
+
+            // Retry a few times in case the map is still instantiating
+            int retries = 0;
+            while ((_spawnPoints == null || _spawnPoints.Length == 0) && retries < 10) {
+                yield return new WaitForSeconds(0.1f);
+                RefreshSpawnPoints();
+                retries++;
+            }
+        }
+
+        if (_spawnPoints == null || _spawnPoints.Length == 0) {
+            Debug.LogError("No spawn points found! Players will spawn at origin.");
+        }
+        else {
+            Debug.Log($"Found {_spawnPoints.Length} spawn points for player spawning");
+        }
+
         Debug.Log($"Spawning players — connected clients: {NetworkManager.Singleton.ConnectedClientsIds.Count}");
 
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds) {
