@@ -1,7 +1,6 @@
 # Link To Bugs Trello Board: https://trello.com/b/vTTwVn4M
 
 # Changes To Do
-+ x10 gamemode checkbox added but fix it, not applying i think (havent testeted on client) nut make firerate 10x as well
 + Make respawn 5 seconds
 + Overhall netcode before playtest
 
@@ -9,8 +8,7 @@
 
 + Home Base, arcade cabinit where you can play nightingale
 
-+ Add dmg taken and dealt to stats
-+ Random Map Select (spawns map prefab from list of prefabs)
++ Add dmg taken, dmg dealt, deaths to stats
 
 + Guns
 + + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp, inceasre run speed and jump height)

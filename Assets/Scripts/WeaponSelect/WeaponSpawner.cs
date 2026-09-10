@@ -1,6 +1,7 @@
 ﻿using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
+using System.Collections;
 
 public class WeaponSpawner : NetworkBehaviour {
     [Header("Registries")]
@@ -14,13 +15,33 @@ public class WeaponSpawner : NetworkBehaviour {
     private GameObject _currentWeapon;
     private GameObject _currentModel;
 
+    IEnumerator SpawnAfterSelectionsReceived() {
+        yield return null;
+        yield return null;
+
+        int weaponIndex = PlayerWeaponSelection.Instance != null
+            ? PlayerWeaponSelection.Instance.GetWeaponIndex(OwnerClientId)
+            : 0;
+        SpawnWeapon(weaponIndex);
+
+        int charIndex = PlayerCharacterSelection.Instance != null
+            ? PlayerCharacterSelection.Instance.GetCharacterIndex(OwnerClientId)
+            : 0;
+        SpawnCharacterModel(charIndex);
+    }
+
     public override void OnNetworkSpawn() {
-        if (IsServer) {
-            int weaponIndex = PlayerWeaponSelection.Instance != null
-                ? PlayerWeaponSelection.Instance.GetWeaponIndex(OwnerClientId)
-                : 0;
-            SpawnWeapon(weaponIndex);
+        if (IsServer)
+            StartCoroutine(SpawnAfterSelectionsReceived());
+        else {
+            // Clients just spawn the model locally using their own stored selection
+            StartCoroutine(SpawnModelWhenReady());
         }
+    }
+
+    IEnumerator SpawnModelWhenReady() {
+        yield return null;
+        yield return null;
 
         int charIndex = PlayerCharacterSelection.Instance != null
             ? PlayerCharacterSelection.Instance.GetCharacterIndex(OwnerClientId)

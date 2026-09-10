@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerCharacterSelection : MonoBehaviour {
+public class PlayerCharacterSelection : NetworkBehaviour {
     public static PlayerCharacterSelection Instance;
 
     private System.Collections.Generic.Dictionary<ulong, int> _selections
@@ -16,10 +17,16 @@ public class PlayerCharacterSelection : MonoBehaviour {
         else Destroy(gameObject);
     }
 
-    // No longer an RPC — just store locally
-    public void SelectCharacter(int characterIndex, ulong clientId) {
+    // Client calls this to register their selection on the server
+    [ServerRpc(RequireOwnership = false)]
+    public void SelectCharacterServerRpc(int characterIndex, ulong clientId) {
         _selections[clientId] = characterIndex;
-        Debug.Log($"Client {clientId} selected character index {characterIndex}");
+        Debug.Log($"[AlbaMod] Server stored character {characterIndex} for client {clientId}");
+    }
+
+    // Also store locally for immediate access before network is ready
+    public void SelectCharacterLocal(int characterIndex, ulong clientId) {
+        _selections[clientId] = characterIndex;
     }
 
     public int GetCharacterIndex(ulong clientId) {

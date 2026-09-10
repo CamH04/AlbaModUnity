@@ -81,15 +81,33 @@ public class CharacterSelectionUI : MonoBehaviour {
         if (characterDescription != null)
             characterDescription.text = def.characterDescription;
 
-        // Store locally — no RPC needed, server reads this at spawn time
-        if (PlayerCharacterSelection.Instance != null) {
-            ulong clientId = Unity.Netcode.NetworkManager.Singleton != null
-                ? Unity.Netcode.NetworkManager.Singleton.LocalClientId
-                : 0;
+        if (PlayerCharacterSelection.Instance != null
+            && NetworkManager.Singleton != null
+            && NetworkManager.Singleton.IsConnectedClient) {
+            ulong localId = NetworkManager.Singleton.LocalClientId;
 
-            PlayerCharacterSelection.Instance.SelectCharacter(index, clientId);
+            // Store locally immediately
+            PlayerCharacterSelection.Instance.SelectCharacterLocal(index, localId);
+
+            // Also send to server so it knows when spawning
+            PlayerCharacterSelection.Instance.SelectCharacterServerRpc(index, localId);
+
+            _pendingSelection = -1;
         }
+        else {
+            _pendingSelection = index;
+        }
+    }
 
-        _pendingSelection = -1; // clear pending since we handle it directly now
+    void Update() {
+        if (_pendingSelection >= 0
+            && NetworkManager.Singleton != null
+            && NetworkManager.Singleton.IsConnectedClient
+            && PlayerCharacterSelection.Instance != null) {
+            ulong localId = NetworkManager.Singleton.LocalClientId;
+            PlayerCharacterSelection.Instance.SelectCharacterLocal(_pendingSelection, localId);
+            PlayerCharacterSelection.Instance.SelectCharacterServerRpc(_pendingSelection, localId);
+            _pendingSelection = -1;
+        }
     }
 }
