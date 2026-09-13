@@ -25,7 +25,7 @@
 
 + Characters
 + + Finish Luna
-+ + unkown 
++ + unkown (KRNK) (crunk aint dead mv cld be funny)
 + + faceless
 + + north east miner bloke
 
