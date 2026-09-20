@@ -5,13 +5,15 @@
 + Overhall netcode before playtest
 
 # To Add
-
-+ Home Base, arcade cabinit where you can play nightingale
-
 + Add dmg taken, dmg dealt, deaths to stats
 
++ Home Base
++ + Game cabinits:
++ + + Nightingale
++ + + Osu!
+
 + Guns
-+ + Steel Boot (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp, inceasre run speed and jump height)
++ + Steel Boot can kick (melle attack) (parrys projectiles , travels at 1.5x speed and does flat 150 dmg on hit, mantreds stomp, inceasre run speed and jump height)
 + + Nitro cell from R6 but at mach 480912
 + + Shotgun (nockgun) 1 shot at close range
 + + SMG (vector) 
