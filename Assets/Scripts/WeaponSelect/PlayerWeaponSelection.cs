@@ -1,10 +1,8 @@
-using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerWeaponSelection : NetworkBehaviour {
+public class PlayerWeaponSelection : MonoBehaviour {
     public static PlayerWeaponSelection Instance;
 
-    // Maps clientId -> selected weapon index
     private System.Collections.Generic.Dictionary<ulong, int> _selections
         = new System.Collections.Generic.Dictionary<ulong, int>();
 
@@ -18,14 +16,13 @@ public class PlayerWeaponSelection : NetworkBehaviour {
         else Destroy(gameObject);
     }
 
-    // Called by client when they pick a weapon in lobby
-    [ServerRpc(RequireOwnership = false)]
-    public void SelectWeaponServerRpc(int weaponIndex, ulong clientId) {
-        _selections[clientId] = weaponIndex;
-        Debug.Log($"Client {clientId} selected weapon index {weaponIndex}");
+    public void StoreSelection(ulong clientId, int index) {
+        _selections[clientId] = index;
+        Debug.Log($"[AlbaMod] Stored weapon {index} for client {clientId}");
     }
 
     public int GetWeaponIndex(ulong clientId) {
-        return _selections.TryGetValue(clientId, out int index) ? index : DefaultWeaponIndex;
+        return _selections.TryGetValue(clientId, out int index)
+            ? index : DefaultWeaponIndex;
     }
 }

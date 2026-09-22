@@ -19,10 +19,10 @@ public class WeaponSelectionUI : MonoBehaviour {
     public Color unselectedColor = new Color(0.2f, 0.2f, 0.2f);
 
     private int _selectedIndex = 0;
+    private int _pendingSelection = 0;
     private Button[] _buttons;
 
     void Start() {
-        // Validate registry assigned
         if (weaponRegistry == null) {
             Debug.LogError("WeaponSelectionUI: WeaponRegistry not assigned in Inspector!");
             return;
@@ -50,7 +50,7 @@ public class WeaponSelectionUI : MonoBehaviour {
             var btn = btnObj.GetComponent<Button>();
 
             if (btn == null) {
-                Debug.LogError($"WeaponSelectionUI: button prefab has no Button component!");
+                Debug.LogError("WeaponSelectionUI: button prefab has no Button component!");
                 continue;
             }
 
@@ -62,7 +62,7 @@ public class WeaponSelectionUI : MonoBehaviour {
             if (label != null)
                 label.text = entry.weaponName;
             else
-                Debug.LogWarning($"WeaponSelectionUI: button prefab missing 'Label' child TextMeshPro");
+                Debug.LogWarning("WeaponSelectionUI: button prefab missing 'Label' child TextMeshPro");
 
             int index = i;
             btn.onClick.AddListener(() => SelectWeapon(index));
@@ -82,35 +82,29 @@ public class WeaponSelectionUI : MonoBehaviour {
 
         var weapon = weaponRegistry.weapons[index];
 
-        if (selectedWeaponIcon != null)
-            selectedWeaponIcon.sprite = weapon.weaponIcon;
-        if (selectedWeaponName != null)
-            selectedWeaponName.text = weapon.weaponName;
-        if (selectedWeaponDescription != null)
-            selectedWeaponDescription.text = weapon.weaponDescription;
+        if (selectedWeaponIcon != null) selectedWeaponIcon.sprite = weapon.weaponIcon;
+        if (selectedWeaponName != null) selectedWeaponName.text = weapon.weaponName;
+        if (selectedWeaponDescription != null) selectedWeaponDescription.text = weapon.weaponDescription;
 
-        // Only send to server if already connected
-        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsConnectedClient
+        if (NetworkManager.Singleton != null
+            && NetworkManager.Singleton.IsConnectedClient
             && PlayerWeaponSelection.Instance != null) {
-            PlayerWeaponSelection.Instance.SelectWeaponServerRpc(
-                index, NetworkManager.Singleton.LocalClientId);
+            PlayerWeaponSelection.Instance.StoreSelection(
+                NetworkManager.Singleton.LocalClientId, index);
+            _pendingSelection = -1;
         }
         else {
-            // Store locally and send when connected
             _pendingSelection = index;
         }
     }
 
-    private int _pendingSelection = 0;
-
     void Update() {
-        // Send pending selection once connected
         if (_pendingSelection >= 0
             && NetworkManager.Singleton != null
             && NetworkManager.Singleton.IsConnectedClient
             && PlayerWeaponSelection.Instance != null) {
-            PlayerWeaponSelection.Instance.SelectWeaponServerRpc(
-                _pendingSelection, NetworkManager.Singleton.LocalClientId);
+            PlayerWeaponSelection.Instance.StoreSelection(
+                NetworkManager.Singleton.LocalClientId, _pendingSelection);
             _pendingSelection = -1;
         }
     }

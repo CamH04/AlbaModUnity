@@ -15,28 +15,13 @@ public class WeaponSpawner : NetworkBehaviour {
     private GameObject _currentWeapon;
     private GameObject _currentModel;
 
-    IEnumerator SpawnAfterSelectionsReceived() {
-        yield return null;
-        yield return null;
-
-        int weaponIndex = PlayerWeaponSelection.Instance != null
-            ? PlayerWeaponSelection.Instance.GetWeaponIndex(OwnerClientId)
-            : 0;
-        SpawnWeapon(weaponIndex);
-
-        int charIndex = PlayerCharacterSelection.Instance != null
-            ? PlayerCharacterSelection.Instance.GetCharacterIndex(OwnerClientId)
-            : 0;
-        SpawnCharacterModel(charIndex);
-    }
+    public GameObject GetCurrentModel() => _currentModel;
 
     public override void OnNetworkSpawn() {
-        if (IsServer)
-            StartCoroutine(SpawnAfterSelectionsReceived());
-        else {
-            // Clients just spawn the model locally using their own stored selection
-            StartCoroutine(SpawnModelWhenReady());
-        }
+        // Driven by ClientSelectionSync.SyncSelectionsServerRpc
+        // which calls SpawnWithSelections once selections are confirmed
+        //if (!IsServer)
+        //    StartCoroutine(SpawnModelWhenReady());
     }
 
     IEnumerator SpawnModelWhenReady() {
@@ -47,6 +32,13 @@ public class WeaponSpawner : NetworkBehaviour {
             ? PlayerCharacterSelection.Instance.GetCharacterIndex(OwnerClientId)
             : 0;
         SpawnCharacterModel(charIndex);
+    }
+
+    // Called by ClientSelectionSync on the server once selections are confirmed
+    public void SpawnWithSelections(int charIndex, int weaponIndex) {
+        if (!IsServer) return;
+        SpawnWeapon(weaponIndex);
+        SpawnCharacterModelForIndex(charIndex);
     }
 
     // ── Weapon ────────────────────────────────────────────────────────────────
@@ -77,10 +69,9 @@ public class WeaponSpawner : NetworkBehaviour {
         if (weapon != null)
             weapon.SetCamera(playerCamera);
 
-        // Tell all clients to attach the weapon visually to this player
         AttachWeaponClientRpc(netObj.NetworkObjectId);
 
-        Debug.Log($"Spawned {entry.weaponName} for client {OwnerClientId}");
+        Debug.Log($"[AlbaMod] Spawned {entry.weaponName} for client {OwnerClientId}");
     }
 
     [ClientRpc]
@@ -88,8 +79,7 @@ public class WeaponSpawner : NetworkBehaviour {
         StartCoroutine(AttachWeaponWhenReady(weaponNetworkObjectId));
     }
 
-    System.Collections.IEnumerator AttachWeaponWhenReady(ulong weaponNetworkObjectId) {
-        // Wait until the weapon NetworkObject is registered on this client
+    IEnumerator AttachWeaponWhenReady(ulong weaponNetworkObjectId) {
         NetworkObject weaponNetObj = null;
         float timeout = 5f;
         float elapsed = 0f;
@@ -102,24 +92,26 @@ public class WeaponSpawner : NetworkBehaviour {
         }
 
         if (weaponNetObj == null) {
-            Debug.LogError($"WeaponSpawner: timed out waiting for weapon {weaponNetworkObjectId}");
+            Debug.LogError($"[AlbaMod] WeaponSpawner: timed out waiting for weapon {weaponNetworkObjectId}");
             yield break;
         }
 
-        // Store reference so LateUpdate can track it
         _currentWeapon = weaponNetObj.gameObject;
-        Debug.Log($"Client attached weapon {_currentWeapon.name} to player {OwnerClientId}");
+        Debug.Log($"[AlbaMod] Client attached weapon {_currentWeapon.name} to player {OwnerClientId}");
     }
 
     // ── Character model ───────────────────────────────────────────────────────
 
-    void SpawnCharacterModel(int index) {
-        if (characterRegistry == null
-            || index >= characterRegistry.characters.Length) return;
+    // Called by SpawnWithSelections (server) with confirmed index
+    public void SpawnCharacterModelForIndex(int index) {
+        if (characterRegistry == null || index >= characterRegistry.characters.Length) {
+            Debug.LogWarning($"[AlbaMod] WeaponSpawner: invalid character index {index}");
+            return;
+        }
 
         var def = characterRegistry.characters[index];
         if (def.characterModelPrefab == null) {
-            Debug.LogWarning($"Character {def.characterName} has no model prefab!");
+            Debug.LogWarning($"[AlbaMod] WeaponSpawner: {def.characterName} has no model prefab!");
             return;
         }
 
@@ -138,7 +130,12 @@ public class WeaponSpawner : NetworkBehaviour {
         if (IsOwner)
             SetModelVisibility(false);
 
-        Debug.Log($"Spawned model {def.characterName} for client {OwnerClientId}");
+        Debug.Log($"[AlbaMod] Spawned model {def.characterName} for client {OwnerClientId} | isOwner:{IsOwner}");
+    }
+
+    // Called by SpawnModelWhenReady (clients) using locally stored index
+    void SpawnCharacterModel(int index) {
+        SpawnCharacterModelForIndex(index);
     }
 
     void SetModelVisibility(bool visible) {
@@ -153,8 +150,6 @@ public class WeaponSpawner : NetworkBehaviour {
         if (_currentWeapon == null) return;
         if (weaponHolder == null) return;
 
-        // Only the owner drives the weapon position
-        // NetworkTransform on the weapon replicates it to everyone else
         if (IsOwner) {
             _currentWeapon.transform.position = weaponHolder.position;
             _currentWeapon.transform.rotation = weaponHolder.rotation;

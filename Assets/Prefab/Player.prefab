@@ -287,6 +287,8 @@ GameObject:
   - component: {fileID: 1133074205835015485}
   - component: {fileID: 881986936844086063}
   - component: {fileID: 8902476620130851608}
+  - component: {fileID: 1724096230586490327}
+  - component: {fileID: -6480912638060949110}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -763,6 +765,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   characterRegistry: {fileID: 11400000, guid: dace3dbab9ea65948a8764a31a143b65, type: 2}
+--- !u!114 &1724096230586490327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5994856343534761650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18a3884c262f0749b2e6d68033c0108, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &-6480912638060949110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5994856343534761650}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bc69651547333040b716cb763b69d3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &8220790024536940127
 GameObject:
   m_ObjectHideFlags: 0

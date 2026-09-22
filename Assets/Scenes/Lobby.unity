@@ -1753,7 +1753,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20f06293f6b17e946a48f8879202d076, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   DefaultWeaponIndex: 0
 --- !u!1 &168430837
 GameObject:
@@ -11774,6 +11773,7 @@ GameObject:
   - component: {fileID: 1681395785}
   - component: {fileID: 1681395786}
   - component: {fileID: 1681395787}
+  - component: {fileID: 1681395788}
   m_Layer: 0
   m_Name: Bootstrapper
   m_TagString: Untagged
@@ -11850,7 +11850,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 729e0c1b4b39f504ab7a2dc5acc82f80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   DefaultCharacterIndex: 0
 --- !u!114 &1681395785
 MonoBehaviour:
@@ -11891,6 +11890,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapRegistry: {fileID: 11400000, guid: afc75b394d1d3344dae4d967ab59721c, type: 2}
+--- !u!114 &1681395788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681395779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bc69651547333040b716cb763b69d3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &1702191363
 GameObject:
   m_ObjectHideFlags: 0

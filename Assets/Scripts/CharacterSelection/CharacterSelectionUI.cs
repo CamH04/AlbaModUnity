@@ -50,8 +50,10 @@ public class CharacterSelectionUI : MonoBehaviour {
             var btn = btnObj.GetComponent<Button>();
 
             var portrait = btnObj.transform.Find("Portrait")?.GetComponent<Image>();
-            if (portrait != null && def.characterPortrait != null)
+            if (portrait != null && def.characterPortrait != null) {
                 portrait.sprite = def.characterPortrait;
+                portrait.color = Color.white;
+            }
 
             var label = btnObj.transform.Find("Label")?.GetComponent<TextMeshProUGUI>();
             if (label != null)
@@ -76,22 +78,14 @@ public class CharacterSelectionUI : MonoBehaviour {
         var def = characterRegistry.characters[index];
         if (characterPortrait != null && def.characterPortrait != null)
             characterPortrait.sprite = def.characterPortrait;
-        if (characterName != null)
-            characterName.text = def.characterName;
-        if (characterDescription != null)
-            characterDescription.text = def.characterDescription;
+        if (characterName != null) characterName.text = def.characterName;
+        if (characterDescription != null) characterDescription.text = def.characterDescription;
 
         if (PlayerCharacterSelection.Instance != null
             && NetworkManager.Singleton != null
             && NetworkManager.Singleton.IsConnectedClient) {
-            ulong localId = NetworkManager.Singleton.LocalClientId;
-
-            // Store locally immediately
-            PlayerCharacterSelection.Instance.SelectCharacterLocal(index, localId);
-
-            // Also send to server so it knows when spawning
-            PlayerCharacterSelection.Instance.SelectCharacterServerRpc(index, localId);
-
+            PlayerCharacterSelection.Instance.StoreSelection(
+                NetworkManager.Singleton.LocalClientId, index);
             _pendingSelection = -1;
         }
         else {
@@ -104,9 +98,8 @@ public class CharacterSelectionUI : MonoBehaviour {
             && NetworkManager.Singleton != null
             && NetworkManager.Singleton.IsConnectedClient
             && PlayerCharacterSelection.Instance != null) {
-            ulong localId = NetworkManager.Singleton.LocalClientId;
-            PlayerCharacterSelection.Instance.SelectCharacterLocal(_pendingSelection, localId);
-            PlayerCharacterSelection.Instance.SelectCharacterServerRpc(_pendingSelection, localId);
+            PlayerCharacterSelection.Instance.StoreSelection(
+                NetworkManager.Singleton.LocalClientId, _pendingSelection);
             _pendingSelection = -1;
         }
     }
