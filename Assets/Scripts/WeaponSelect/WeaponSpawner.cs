@@ -147,13 +147,16 @@ public class WeaponSpawner : NetworkBehaviour {
     // ── Weapon position tracking ──────────────────────────────────────────────
 
     void LateUpdate() {
-        if (_currentWeapon == null) return;
-        if (weaponHolder == null) return;
-
-        if (IsOwner) {
+        if (_currentWeapon != null && weaponHolder != null && IsOwner) {
             _currentWeapon.transform.position = weaponHolder.position;
             _currentWeapon.transform.rotation = weaponHolder.rotation;
         }
+
+        // Rotate modelHolder to match player yaw locally
+        if (modelHolder != null && IsOwner) {
+            modelHolder.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+        }
+
     }
 
     public override void OnNetworkDespawn() {

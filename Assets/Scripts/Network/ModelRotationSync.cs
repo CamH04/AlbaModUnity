@@ -2,7 +2,6 @@ using Unity.Netcode;
 using UnityEngine;
 
 public class ModelRotationSync : NetworkBehaviour {
-    // Synced yaw rotation for all clients to read
     private NetworkVariable<float> _yaw = new NetworkVariable<float>(
         0f,
         NetworkVariableReadPermission.Everyone,
@@ -10,7 +9,6 @@ public class ModelRotationSync : NetworkBehaviour {
     );
 
     private WeaponSpawner _weaponSpawner;
-    private Transform _modelTransform;
 
     void Awake() {
         _weaponSpawner = GetComponent<WeaponSpawner>();
@@ -25,26 +23,18 @@ public class ModelRotationSync : NetworkBehaviour {
     }
 
     void Update() {
-        // Owner writes their yaw every frame
-        if (IsOwner) {
-            _yaw.Value = transform.eulerAngles.y;
-        }
+        if (!IsOwner) return;
 
-        // Apply yaw to model on all clients every frame
-        ApplyYawToModel(_yaw.Value);
+        // Owner writes yaw every frame
+        _yaw.Value = transform.eulerAngles.y;
     }
 
     void OnYawChanged(float previous, float current) {
-        ApplyYawToModel(current);
-    }
+        if (IsOwner) return;
 
-    void ApplyYawToModel(float yaw) {
-        if (_weaponSpawner == null) return;
-
-        // Get model from WeaponSpawner
-        var model = _weaponSpawner.GetCurrentModel();
-        if (model == null) return;
-
-        model.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+        // Rotate the modelHolder so the parented model follows
+        var holder = _weaponSpawner?.modelHolder;
+        if (holder != null)
+            holder.rotation = Quaternion.Euler(0f, current, 0f);
     }
 }
