@@ -127,17 +127,49 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 34031115830473751, guid: b0d05d055e428764896317191e97a6c0, type: 3}
-      propertyPath: image
-      value: 
-      objectReference: {fileID: 2800000, guid: dbd56ef1aa5b88847b4990756630f970, type: 3}
+    - target: {fileID: 411434725042440311, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
+      objectReference: {fileID: 0}
+    - target: {fileID: 1109135133557415979, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
+      objectReference: {fileID: 0}
+    - target: {fileID: 1558268108610981277, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
+      objectReference: {fileID: 0}
+    - target: {fileID: 2023218276100435847, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
+      objectReference: {fileID: 0}
+    - target: {fileID: 2919396651928196890, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4517099333947303285, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.529
+      objectReference: {fileID: 0}
     - target: {fileID: 4852611685990578216, guid: b0d05d055e428764896317191e97a6c0, type: 3}
       propertyPath: m_Name
       value: GallaryMap
       objectReference: {fileID: 0}
-    - target: {fileID: 6231361117963158385, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+    - target: {fileID: 5307244159307977064, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5464996369900361627, guid: b0d05d055e428764896317191e97a6c0, type: 3}
       propertyPath: m_Name
-      value: Pillar11(WorkingOn)Stephane
+      value: Pillar5DONEScum
+      objectReference: {fileID: 0}
+    - target: {fileID: 6975589085008719769, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_Name
+      value: Pillar16DONEArchie
+      objectReference: {fileID: 0}
+    - target: {fileID: 7352531136563184660, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
       objectReference: {fileID: 0}
     - target: {fileID: 7621149711151238008, guid: b0d05d055e428764896317191e97a6c0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -179,10 +211,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8721321111981971793, guid: b0d05d055e428764896317191e97a6c0, type: 3}
-      propertyPath: image
-      value: 
-      objectReference: {fileID: 2800000, guid: 693d537183dfae14fbd2ce7bef198d8c, type: 3}
+    - target: {fileID: 8386501882463725187, guid: b0d05d055e428764896317191e97a6c0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.5290001
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
