@@ -28,10 +28,34 @@ public abstract class HitscanBase : WeaponBase {
     protected virtual void FireHitscan(Vector3 origin, Vector3 direction) {
         if (!IsServer) return;
 
-        if (!Physics.Raycast(origin, direction, out RaycastHit hit, range, hitMask))
+        // Cast through everything and pick the first hit that isn't the shooter's
+        // own body. The fire origin comes from the camera, which swings just
+        // outside the player's capsule at steep look angles (the camera orbits
+        // the feet at a 0.8m radius), letting the ray accidentally graze your
+        // own collider. Skip our own PlayerHealth so we can never shoot or hurt
+        // ourselves, while the bullet still carries on past our body.
+        RaycastHit[] hits = Physics.RaycastAll(origin, direction, range, hitMask);
+        if (hits.Length == 0)
             return;
 
-        PlayerHealth health = hit.collider.GetComponentInParent<PlayerHealth>();
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        PlayerHealth health = null;
+        RaycastHit hit = default(RaycastHit);
+        bool found = false;
+        foreach (var h in hits) {
+            var hp = h.collider.GetComponentInParent<PlayerHealth>();
+            if (hp != null && hp.OwnerClientId == OwnerClientId)
+                continue; // never hit ourselves with our own hitscan
+
+            hit = h;
+            health = hp;
+            found = true;
+            break;
+        }
+
+        if (!found)
+            return;
 
         if (health != null && !health.IsDead) {
             float finalDamage = damage;

@@ -16,8 +16,7 @@ public class RocketProjectile : ProjectileBase {
     private bool _hasExploded = false;
 
     public virtual void Initialise(ulong shooterId) {
-        shooterClientId = shooterId;
-        spawnTime = Time.time;
+        base.Initialise(shooterId); // sets shooterClientId, spawnTime, spawnPosition
 
         // Apply *10 mode multipliers
         if (GameModeSettings.Instance != null && GameModeSettings.Instance.IsTenXMode.Value) {
@@ -32,10 +31,12 @@ public class RocketProjectile : ProjectileBase {
     protected override void OnHit(Collider other, Vector3 hitPoint, Vector3 hitNormal) {
         if (_hasExploded) return;
 
-        // Don't hit the shooter immediately after firing
+        // Don't direct-hit the shooter until the rocket is armed (travelled
+        // past its own body). Same rule as ProjectileBase.OnTriggerEnter â€”
+        // defence in depth for the direct-hit path.
         var hitHealth = other.GetComponentInParent<PlayerHealth>();
         if (hitHealth != null && hitHealth.OwnerClientId == shooterClientId &&
-            Time.time - spawnTime < 0.15f) return;
+            Vector3.Distance(transform.position, spawnPosition) < armDistance) return;
 
         Explode(hitPoint, hitNormal, hitHealth);
     }
@@ -132,7 +133,7 @@ public class RocketProjectile : ProjectileBase {
         foreach (var player in FindObjectsOfType<PlayerMotor>()) {
             var netObj = player.GetComponent<NetworkObject>();
             if (netObj != null && netObj.OwnerClientId == targetClientId) {
-                // Preserve momentum — add to existing velocity rather than replace it
+                // Preserve momentum ï¿½ add to existing velocity rather than replace it
                 Vector3 newVel = player.Velocity + force;
                 player.SetVelocity(newVel);
                 break;

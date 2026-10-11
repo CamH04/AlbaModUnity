@@ -65,13 +65,15 @@ public class RocketLauncher : WeaponBase {
         var rocketObj = Instantiate(rocketPrefab, position,
             Quaternion.LookRotation(direction));
 
-        var netObj = rocketObj.GetComponent<NetworkObject>();
-        netObj.Spawn();
-
         var rocket = rocketObj.GetComponent<RocketProjectile>();
         if (rocket != null) {
             rocket.speed = rocketSpeed;
+            // Initialise BEFORE Spawn() so spawnTime/spawnPosition are set
+            // before the object can process any physics/trigger events.
             rocket.Initialise(OwnerClientId);
         }
+
+        var netObj = rocketObj.GetComponent<NetworkObject>();
+        netObj.Spawn();
     }
 }
