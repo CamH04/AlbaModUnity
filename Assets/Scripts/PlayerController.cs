@@ -45,6 +45,10 @@ public class PlayerController : NetworkBehaviour {
 
     private bool _isOwned = false;
 
+    // Exposed so ability systems (e.g. the swing-grapple) can read the current
+    // movement input for steering without duplicating keyboard polling.
+    public Vector2 MoveInput => _moveInput;
+
     void Awake() {
         _motor = GetComponent<PlayerMotor>();
         _wallRun = GetComponent<WallRunController>();
@@ -138,6 +142,10 @@ public class PlayerController : NetworkBehaviour {
             _motor.GrappleStep();
             return;
         }
+
+        // An ability (e.g. the swing-grapple) is driving the CharacterController.
+        // Skip normal movement entirely so input can't fight the grapple.
+        if (_motor.ExternalControl) return;
 
         float hSpeed = new Vector3(_motor.Velocity.x, 0, _motor.Velocity.z).magnitude;
 

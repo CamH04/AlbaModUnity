@@ -43,6 +43,13 @@ public class PlayerMotor : MonoBehaviour {
     public bool IsGrounded => _cc.isGrounded;
     public bool IsGrappling => _isGrappling;
 
+    // When an external system (e.g. the Abilities swing-grapple) owns movement,
+    // PlayerController must not apply normal input/gravity on top of it - that is
+    // what let movement input (holding S) fight and cancel the grapple pull.
+    private bool _externalControl;
+    public bool ExternalControl => _externalControl;
+    public void SetExternalControl(bool active) => _externalControl = active;
+
     void Awake() {
         _cc = GetComponent<CharacterController>();
     }
