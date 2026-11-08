@@ -5,7 +5,10 @@
 + Overhall netcode before playtest
 
 # To Add
++ Make some songs exclusive to lighthouse
 + Add dmg taken, dmg dealt, deaths to stats
++ Gib on death with nighengale death particles
+
 
 + Home Base
 + + Game cabinits:
@@ -18,7 +21,8 @@
 + + Shotgun (nockgun) 1 shot at close range
 + + SMG (vector) 
 + + Throwing Knife 1 shot body
-+ + Half Satoichi 
++ + Quarter Satoichi (fires fire aoe infront of player)
++ + Nether blade 1 tap mealee(riftwalk on right click 2 sec cd) 
 
 + Maps
 + + Penshaw monument map (with worm killbox) 
@@ -26,10 +30,10 @@
 + + Aldershot Gallaries
 
 + Characters
-+ + Finish Luna
++ + Baghead from it was going so well
 + + unkown (KRNK) (crunk aint dead mv cld be funny)
 + + faceless
-+ + north east miner bloke
++ + Miner (unnamed)
 
 
 + Rail grinding????

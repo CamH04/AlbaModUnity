@@ -21,6 +21,10 @@ public class MusicPlayer : MonoBehaviour {
     private HashSet<int> _enabledTracks = new HashSet<int>();
     private const string SaveKey = "AlbaMod_EnabledTracks";
 
+    // Secret "Lighthouse" playlist — tracks moved out of the main playlist
+    private HashSet<int> _lighthouseTracks = new HashSet<int>();
+    private const string LighthouseKey = "AlbaMod_LighthouseTracks";
+
     public int CurrentTrackIndex => _currentTrackIndex;
     public bool IsPlaying => _isPlaying;
 
@@ -43,6 +47,7 @@ public class MusicPlayer : MonoBehaviour {
             _audioSource.loop = false;
             _audioSource.volume = volume;
             LoadSelection();
+            LoadLighthouse();
         }
         else Destroy(gameObject);
     }
@@ -126,17 +131,79 @@ public class MusicPlayer : MonoBehaviour {
             BuildShuffledQueue();
     }
 
-    public void EnableAll() {
+    public void EnableAllMain() {
+        if (playlist == null) return;
+
         for (int i = 0; i < playlist.tracks.Length; i++)
-            _enabledTracks.Add(i);
+            if (!IsLighthouseTrack(i))
+                _enabledTracks.Add(i);
+
         SaveSelection();
         BuildShuffledQueue();
     }
 
-    public void DisableAll() {
-        _enabledTracks.Clear();
+    public void DisableAllMain() {
+        if (playlist == null) return;
+
+        for (int i = 0; i < playlist.tracks.Length; i++)
+            if (!IsLighthouseTrack(i))
+                _enabledTracks.Remove(i);
+
         SaveSelection();
-        StopPlayback();
+
+        if (_enabledTracks.Count == 0)
+            StopPlayback();
+        else if (_isPlaying)
+            BuildShuffledQueue();
+    }
+
+    // ── Lighthouse playlist ───────────────────────────────────────────────────
+
+    public bool IsLighthouseTrack(int index) => _lighthouseTracks.Contains(index);
+
+    public void SetLighthouseTrack(int index, bool inLighthouse) {
+        if (playlist == null || index < 0 || index >= playlist.tracks.Length) return;
+
+        bool changed = inLighthouse
+            ? _lighthouseTracks.Add(index)
+            : _lighthouseTracks.Remove(index);
+
+        if (!changed) return;
+
+        SaveLighthouse();
+
+        if (_isPlaying)
+            BuildShuffledQueue();
+    }
+
+    public int[] GetLighthouseTrackIndices() {
+        var indices = _lighthouseTracks.ToList();
+        indices.Sort();
+        return indices.ToArray();
+    }
+
+    public void EnableAllLighthouse() {
+        foreach (int index in _lighthouseTracks)
+            _enabledTracks.Add(index);
+
+        SaveSelection();
+
+        if (_enabledTracks.Count > 0 && !_isPlaying)
+            StartPlayback();
+        else if (_isPlaying)
+            BuildShuffledQueue();
+    }
+
+    public void DisableAllLighthouse() {
+        foreach (int index in _lighthouseTracks)
+            _enabledTracks.Remove(index);
+
+        SaveSelection();
+
+        if (_enabledTracks.Count == 0)
+            StopPlayback();
+        else if (_isPlaying)
+            BuildShuffledQueue();
     }
 
     // ── Persistence ───────────────────────────────────────────────────────────
@@ -157,12 +224,35 @@ public class MusicPlayer : MonoBehaviour {
 
         foreach (var part in saved.Split(',')) {
             if (int.TryParse(part.Trim(), out int index)) {
-                if (playlist != null && index < playlist.tracks.Length)
+                if (playlist != null && index >= 0 && index < playlist.tracks.Length)
                     _enabledTracks.Add(index);
             }
         }
 
         Debug.Log($"[AlbaMod Music] Loaded {_enabledTracks.Count} enabled tracks");
+    }
+
+    void SaveLighthouse() {
+        string saved = string.Join(",", _lighthouseTracks);
+        PlayerPrefs.SetString(LighthouseKey, saved);
+        PlayerPrefs.Save();
+        Debug.Log($"[AlbaMod Music] Saved lighthouse tracks: {saved}");
+    }
+
+    void LoadLighthouse() {
+        _lighthouseTracks.Clear();
+
+        string saved = PlayerPrefs.GetString(LighthouseKey, "");
+        if (string.IsNullOrEmpty(saved)) return;
+
+        foreach (var part in saved.Split(',')) {
+            if (int.TryParse(part.Trim(), out int index)) {
+                if (playlist != null && index >= 0 && index < playlist.tracks.Length)
+                    _lighthouseTracks.Add(index);
+            }
+        }
+
+        Debug.Log($"[AlbaMod Music] Loaded {_lighthouseTracks.Count} lighthouse tracks");
     }
 
     // ── Info ──────────────────────────────────────────────────────────────────

@@ -67,6 +67,10 @@ public class PlaylistMenuUI : MonoBehaviour {
             playlistPanel.SetActive(false);
     }
 
+    public void RefreshTrackList() {
+        BuildTrackList();
+    }
+
     void BuildTrackList() {
         foreach (var entry in _trackEntries)
             if (entry != null) Destroy(entry);
@@ -78,6 +82,10 @@ public class PlaylistMenuUI : MonoBehaviour {
         if (playlist == null) return;
 
         for (int i = 0; i < playlist.tracks.Length; i++) {
+            // Lighthouse tracks are hidden from the main playlist
+            if (MusicPlayer.Instance.IsLighthouseTrack(i))
+                continue;
+
             var track = playlist.tracks[i];
             var entryGO = Instantiate(trackEntryPrefab, trackListContainer);
 
@@ -126,7 +134,7 @@ public class PlaylistMenuUI : MonoBehaviour {
     }
 
     void OnSkipClicked() => MusicPlayer.Instance?.SkipTrack();
-    void OnEnableAll() { MusicPlayer.Instance?.EnableAll(); BuildTrackList(); }
-    void OnDisableAll() { MusicPlayer.Instance?.DisableAll(); BuildTrackList(); }
+    void OnEnableAll() { MusicPlayer.Instance?.EnableAllMain(); BuildTrackList(); }
+    void OnDisableAll() { MusicPlayer.Instance?.DisableAllMain(); BuildTrackList(); }
     void OnVolumeChanged(float val) => MusicPlayer.Instance?.SetVolume(val);
 }
