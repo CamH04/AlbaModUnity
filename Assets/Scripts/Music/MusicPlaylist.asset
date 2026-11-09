@@ -25,3 +25,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 453d6e5dcf9fc604b99c9516e37c13da, type: 2}
   - {fileID: 11400000, guid: c9b2d78f704138b4c93289a7b49c90a8, type: 2}
   - {fileID: 11400000, guid: b229d2f8743d10c4dbbcbd4f358cdc4d, type: 2}
+  lighthouseTracks:
+  - {fileID: 11400000, guid: 9e0efa967de34cb3a326137bc9903d39, type: 2}

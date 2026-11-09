@@ -5,6 +5,7 @@
 + Overhall netcode before playtest
 
 # To Add
++ Make killfeed look and appear like terminal text 
 + Make some songs exclusive to lighthouse
 + Add dmg taken, dmg dealt, deaths to stats
 + Gib on death with nighengale death particles

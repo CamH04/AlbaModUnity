@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 public class MusicPlayer : MonoBehaviour {
     public static MusicPlayer Instance;
@@ -13,22 +11,33 @@ public class MusicPlayer : MonoBehaviour {
     public float volume = 0.5f;
 
     private AudioSource _audioSource;
-    private List<int> _queue = new List<int>();
-    private int _currentTrackIndex = -1;
+    private readonly List<MusicTrack> _queue = new List<MusicTrack>();
+    private MusicTrack _currentTrack;
     private bool _isPlaying = false;
 
-    // Persisted selection — track indices the player has enabled
-    private HashSet<int> _enabledTracks = new HashSet<int>();
+    // Persisted selection — standard track indices the player has enabled
+    private readonly HashSet<int> _enabledTracks = new HashSet<int>();
     private const string SaveKey = "AlbaMod_EnabledTracks";
 
-    // Secret "Lighthouse" playlist — tracks moved out of the main playlist
-    private HashSet<int> _lighthouseTracks = new HashSet<int>();
-    private const string LighthouseKey = "AlbaMod_LighthouseTracks";
+    // Lighthouse-exclusive tracks are selected separately, but their selected
+    // songs share the same live queue as the standard playlist.
+    private readonly HashSet<int> _enabledLighthouseTracks = new HashSet<int>();
+    private const string LighthouseSaveKey = "AlbaMod_EnabledLighthouseTracks";
 
-    public int CurrentTrackIndex => _currentTrackIndex;
     public bool IsPlaying => _isPlaying;
 
     public AudioSource AudioSource => _audioSource;
+
+    public MusicTrack CurrentTrack => _currentTrack;
+
+    public int CurrentTrackIndex {
+        get {
+            if (_currentTrack == null || playlist == null || playlist.tracks == null)
+                return -1;
+
+            return System.Array.IndexOf(playlist.tracks, _currentTrack);
+        }
+    }
 
     public float Volume {
         get => volume;
@@ -56,7 +65,7 @@ public class MusicPlayer : MonoBehaviour {
         volume = PlayerPrefs.GetFloat("AlbaMod_MusicVolume", 0.5f);
         _audioSource.volume = volume;
 
-        if (_enabledTracks.Count > 0)
+        if (HasSelection)
             StartPlayback();
     }
 
@@ -68,8 +77,11 @@ public class MusicPlayer : MonoBehaviour {
 
     // ── Playback ──────────────────────────────────────────────────────────────
 
+    bool HasSelection =>
+        _enabledTracks.Count > 0 || _enabledLighthouseTracks.Count > 0;
+
     public void StartPlayback() {
-        if (_enabledTracks.Count == 0) return;
+        if (!HasSelection) return;
         BuildShuffledQueue();
         _isPlaying = true;
         PlayNext();
@@ -86,26 +98,54 @@ public class MusicPlayer : MonoBehaviour {
     }
 
     void PlayNext() {
-        if (_queue.Count == 0)
-            BuildShuffledQueue();
+        // Skip over any entries that are missing or have no clip.
+        while (true) {
+            if (_queue.Count == 0)
+                BuildShuffledQueue();
 
-        if (_queue.Count == 0) return;
+            if (_queue.Count == 0) {
+                StopPlayback();
+                return;
+            }
 
-        _currentTrackIndex = _queue[0];
-        _queue.RemoveAt(0);
+            _currentTrack = _queue[0];
+            _queue.RemoveAt(0);
 
-        var track = playlist.tracks[_currentTrackIndex];
-        if (track.clip == null) return;
+            if (_currentTrack != null && _currentTrack.clip != null)
+                break;
+        }
 
-        _audioSource.clip = track.clip;
+        _audioSource.clip = _currentTrack.clip;
         _audioSource.volume = volume;
         _audioSource.Play();
 
-        Debug.Log($"[AlbaMod Music] Now playing: {track.trackName} — {track.artistName}");
+        Debug.Log($"[AlbaMod Music] Now playing: {_currentTrack.trackName} — {_currentTrack.artistName}");
     }
 
     void BuildShuffledQueue() {
-        _queue = _enabledTracks.ToList();
+        _queue.Clear();
+
+        if (playlist != null) {
+            // Standard playlist selection
+            if (playlist.tracks != null) {
+                foreach (int index in _enabledTracks) {
+                    if (index >= 0 && index < playlist.tracks.Length &&
+                        playlist.tracks[index] != null &&
+                        playlist.tracks[index].clip != null)
+                        _queue.Add(playlist.tracks[index]);
+                }
+            }
+
+            // Lighthouse selection joins the same live queue
+            if (playlist.lighthouseTracks != null) {
+                foreach (int index in _enabledLighthouseTracks) {
+                    if (index >= 0 && index < playlist.lighthouseTracks.Length &&
+                        playlist.lighthouseTracks[index] != null &&
+                        playlist.lighthouseTracks[index].clip != null)
+                        _queue.Add(playlist.lighthouseTracks[index]);
+                }
+            }
+        }
 
         // Fisher-Yates shuffle
         for (int i = _queue.Count - 1; i > 0; i--) {
@@ -114,95 +154,100 @@ public class MusicPlayer : MonoBehaviour {
         }
     }
 
-    // ── Track selection ───────────────────────────────────────────────────────
+    // ── Standard track selection ──────────────────────────────────────────────
 
     public bool IsTrackEnabled(int index) => _enabledTracks.Contains(index);
 
     public void SetTrackEnabled(int index, bool enabled) {
-        if (enabled)
-            _enabledTracks.Add(index);
-        else
-            _enabledTracks.Remove(index);
+        if (playlist == null || playlist.tracks == null ||
+            index < 0 || index >= playlist.tracks.Length)
+            return;
+
+        bool changed = enabled
+            ? _enabledTracks.Add(index)
+            : _enabledTracks.Remove(index);
+
+        if (!changed) return;
+
+        SaveSelection();
+        RefreshPlaybackAfterSelectionChange();
+    }
+
+    public void EnableAllMain() {
+        if (playlist == null || playlist.tracks == null) return;
+
+        for (int i = 0; i < playlist.tracks.Length; i++)
+            _enabledTracks.Add(i);
 
         SaveSelection();
 
-        // Rebuild queue with new selection
         if (_isPlaying)
             BuildShuffledQueue();
     }
 
-    public void EnableAllMain() {
-        if (playlist == null) return;
-
-        for (int i = 0; i < playlist.tracks.Length; i++)
-            if (!IsLighthouseTrack(i))
-                _enabledTracks.Add(i);
-
-        SaveSelection();
-        BuildShuffledQueue();
-    }
-
     public void DisableAllMain() {
-        if (playlist == null) return;
+        if (playlist == null || playlist.tracks == null) return;
 
-        for (int i = 0; i < playlist.tracks.Length; i++)
-            if (!IsLighthouseTrack(i))
-                _enabledTracks.Remove(i);
-
+        _enabledTracks.Clear();
         SaveSelection();
-
-        if (_enabledTracks.Count == 0)
-            StopPlayback();
-        else if (_isPlaying)
-            BuildShuffledQueue();
+        RefreshPlaybackAfterSelectionChange();
     }
 
-    // ── Lighthouse playlist ───────────────────────────────────────────────────
+    // ── Lighthouse track selection ────────────────────────────────────────────
 
-    public bool IsLighthouseTrack(int index) => _lighthouseTracks.Contains(index);
+    public int LighthouseTrackCount =>
+        playlist != null && playlist.lighthouseTracks != null
+            ? playlist.lighthouseTracks.Length
+            : 0;
 
-    public void SetLighthouseTrack(int index, bool inLighthouse) {
-        if (playlist == null || index < 0 || index >= playlist.tracks.Length) return;
+    public bool IsLighthouseTrackEnabled(int index) =>
+        _enabledLighthouseTracks.Contains(index);
 
-        bool changed = inLighthouse
-            ? _lighthouseTracks.Add(index)
-            : _lighthouseTracks.Remove(index);
+    public void SetLighthouseTrackEnabled(int index, bool enabled) {
+        if (playlist == null || playlist.lighthouseTracks == null ||
+            index < 0 || index >= playlist.lighthouseTracks.Length)
+            return;
+
+        bool changed = enabled
+            ? _enabledLighthouseTracks.Add(index)
+            : _enabledLighthouseTracks.Remove(index);
 
         if (!changed) return;
+
+        SaveLighthouse();
+        RefreshPlaybackAfterSelectionChange();
+    }
+
+    public void EnableAllLighthouse() {
+        if (playlist == null || playlist.lighthouseTracks == null) return;
+
+        for (int i = 0; i < playlist.lighthouseTracks.Length; i++)
+            _enabledLighthouseTracks.Add(i);
 
         SaveLighthouse();
 
         if (_isPlaying)
             BuildShuffledQueue();
-    }
-
-    public int[] GetLighthouseTrackIndices() {
-        var indices = _lighthouseTracks.ToList();
-        indices.Sort();
-        return indices.ToArray();
-    }
-
-    public void EnableAllLighthouse() {
-        foreach (int index in _lighthouseTracks)
-            _enabledTracks.Add(index);
-
-        SaveSelection();
-
-        if (_enabledTracks.Count > 0 && !_isPlaying)
+        else if (HasSelection)
             StartPlayback();
-        else if (_isPlaying)
-            BuildShuffledQueue();
     }
 
     public void DisableAllLighthouse() {
-        foreach (int index in _lighthouseTracks)
-            _enabledTracks.Remove(index);
+        if (playlist == null || playlist.lighthouseTracks == null) return;
 
-        SaveSelection();
+        _enabledLighthouseTracks.Clear();
+        SaveLighthouse();
+        RefreshPlaybackAfterSelectionChange();
+    }
 
-        if (_enabledTracks.Count == 0)
-            StopPlayback();
-        else if (_isPlaying)
+    void RefreshPlaybackAfterSelectionChange() {
+        if (!HasSelection) {
+            if (_isPlaying)
+                StopPlayback();
+            return;
+        }
+
+        if (_isPlaying)
             BuildShuffledQueue();
     }
 
@@ -224,7 +269,8 @@ public class MusicPlayer : MonoBehaviour {
 
         foreach (var part in saved.Split(',')) {
             if (int.TryParse(part.Trim(), out int index)) {
-                if (playlist != null && index >= 0 && index < playlist.tracks.Length)
+                if (playlist != null && playlist.tracks != null &&
+                    index >= 0 && index < playlist.tracks.Length)
                     _enabledTracks.Add(index);
             }
         }
@@ -233,35 +279,32 @@ public class MusicPlayer : MonoBehaviour {
     }
 
     void SaveLighthouse() {
-        string saved = string.Join(",", _lighthouseTracks);
-        PlayerPrefs.SetString(LighthouseKey, saved);
+        string saved = string.Join(",", _enabledLighthouseTracks);
+        PlayerPrefs.SetString(LighthouseSaveKey, saved);
         PlayerPrefs.Save();
-        Debug.Log($"[AlbaMod Music] Saved lighthouse tracks: {saved}");
+        Debug.Log($"[AlbaMod Music] Saved lighthouse selection: {saved}");
     }
 
     void LoadLighthouse() {
-        _lighthouseTracks.Clear();
+        _enabledLighthouseTracks.Clear();
 
-        string saved = PlayerPrefs.GetString(LighthouseKey, "");
+        string saved = PlayerPrefs.GetString(LighthouseSaveKey, "");
         if (string.IsNullOrEmpty(saved)) return;
 
         foreach (var part in saved.Split(',')) {
             if (int.TryParse(part.Trim(), out int index)) {
-                if (playlist != null && index >= 0 && index < playlist.tracks.Length)
-                    _lighthouseTracks.Add(index);
+                if (playlist != null && playlist.lighthouseTracks != null &&
+                    index >= 0 && index < playlist.lighthouseTracks.Length)
+                    _enabledLighthouseTracks.Add(index);
             }
         }
 
-        Debug.Log($"[AlbaMod Music] Loaded {_lighthouseTracks.Count} lighthouse tracks");
+        Debug.Log($"[AlbaMod Music] Loaded {_enabledLighthouseTracks.Count} lighthouse tracks");
     }
 
     // ── Info ──────────────────────────────────────────────────────────────────
 
-    public MusicTrack GetCurrentTrack() {
-        if (_currentTrackIndex < 0 || playlist == null) return null;
-        if (_currentTrackIndex >= playlist.tracks.Length) return null;
-        return playlist.tracks[_currentTrackIndex];
-    }
+    public MusicTrack GetCurrentTrack() => _currentTrack;
 
     public void SetVolume(float val) {
         Volume = val;

@@ -82,10 +82,6 @@ public class PlaylistMenuUI : MonoBehaviour {
         if (playlist == null) return;
 
         for (int i = 0; i < playlist.tracks.Length; i++) {
-            // Lighthouse tracks are hidden from the main playlist
-            if (MusicPlayer.Instance.IsLighthouseTrack(i))
-                continue;
-
             var track = playlist.tracks[i];
             var entryGO = Instantiate(trackEntryPrefab, trackListContainer);
 

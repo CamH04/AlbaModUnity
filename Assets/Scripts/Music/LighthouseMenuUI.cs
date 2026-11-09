@@ -6,10 +6,9 @@ using UnityEngine.UI;
 /// <summary>
 /// Secret "Lighthouse" playlist tab.
 ///
-/// Normal mode shows only the songs that have been moved into the Lighthouse
-/// playlist. "Add Songs" switches the same list into picker mode, where every
-/// track in the project is shown and its toggle adds/removes it from the
-/// Lighthouse. Tracks in the Lighthouse are hidden from the main playlist.
+/// Lists only the Lighthouse-exclusive songs (MusicPlaylist.lighthouseTracks).
+/// Toggling a song selects it for playback. Selected Lighthouse songs share the
+/// same live shuffle queue as the selected songs from the standard playlist.
 /// </summary>
 public class LighthouseMenuUI : MonoBehaviour {
     [Header("Panel")]
@@ -52,7 +51,6 @@ public class LighthouseMenuUI : MonoBehaviour {
     private const string LighthousePassword = "AlbaMusikCode";
 
     private readonly List<GameObject> _trackEntries = new List<GameObject>();
-    private bool _pickerMode;
     private bool _unlocked;
 
     void Awake() {
@@ -80,10 +78,10 @@ public class LighthouseMenuUI : MonoBehaviour {
             closeButton.onClick.AddListener(CloseLighthouse);
         }
 
-        if (addSongsButton != null) {
-            addSongsButton.onClick = new Button.ButtonClickedEvent();
-            addSongsButton.onClick.AddListener(TogglePickerMode);
-        }
+        // The Lighthouse now only lists its own exclusive songs, so the old
+        // "Add Songs" picker is no longer needed.
+        if (addSongsButton != null)
+            addSongsButton.gameObject.SetActive(false);
 
         if (enableAllButton != null) {
             enableAllButton.onClick = new Button.ButtonClickedEvent();
@@ -105,7 +103,6 @@ public class LighthouseMenuUI : MonoBehaviour {
             skipButton.onClick.AddListener(OnSkipClicked);
         }
 
-        UpdateButtonLabels();
         EnsurePasswordPanel();
     }
 
@@ -119,9 +116,7 @@ public class LighthouseMenuUI : MonoBehaviour {
     public void OpenLighthouse() {
         if (lighthousePanel == null) return;
 
-        _pickerMode = false;
         lighthousePanel.SetActive(true);
-        UpdateButtonLabels();
         BuildTrackList();
         RefreshNowPlaying();
     }
@@ -129,8 +124,6 @@ public class LighthouseMenuUI : MonoBehaviour {
     public void CloseLighthouse() {
         if (lighthousePanel != null)
             lighthousePanel.SetActive(false);
-
-        RefreshMainPlaylist();
     }
 
     // ── Password gate ─────────────────────────────────────────────────────────
@@ -616,21 +609,6 @@ public class LighthouseMenuUI : MonoBehaviour {
 
     // ── List building ─────────────────────────────────────────────────────────
 
-    void TogglePickerMode() {
-        _pickerMode = !_pickerMode;
-        UpdateButtonLabels();
-        BuildTrackList();
-    }
-
-    void UpdateButtonLabels() {
-        if (addSongsButtonText != null)
-            addSongsButtonText.text = _pickerMode ? "Done" : "Add Songs";
-    }
-
-    void RefreshMainPlaylist() {
-        GetComponent<PlaylistMenuUI>()?.RefreshTrackList();
-    }
-
     void BuildTrackList() {
         foreach (var entry in _trackEntries)
             if (entry != null) Destroy(entry);
@@ -639,17 +617,12 @@ public class LighthouseMenuUI : MonoBehaviour {
         if (MusicPlayer.Instance == null) return;
 
         var playlist = MusicPlayer.Instance.playlist;
-        if (playlist == null) return;
+        if (playlist == null || playlist.lighthouseTracks == null) return;
 
-        for (int i = 0; i < playlist.tracks.Length; i++) {
-            bool inLighthouse = MusicPlayer.Instance.IsLighthouseTrack(i);
+        for (int i = 0; i < playlist.lighthouseTracks.Length; i++) {
+            var track = playlist.lighthouseTracks[i];
+            if (track == null) continue;
 
-            // Normal mode is the Lighthouse playlist itself. Picker mode shows
-            // the full library so songs can be added or removed.
-            if (!_pickerMode && !inLighthouse)
-                continue;
-
-            var track = playlist.tracks[i];
             var entryGO = Instantiate(trackEntryPrefab, trackListContainer);
 
             var nameText = entryGO.transform.Find("TrackName")
@@ -662,20 +635,11 @@ public class LighthouseMenuUI : MonoBehaviour {
             if (toggle != null) {
                 int index = i;
 
-                if (_pickerMode) {
-                    // Toggle = membership in the Lighthouse playlist.
-                    toggle.isOn = inLighthouse;
-                    toggle.onValueChanged.AddListener(val => {
-                        MusicPlayer.Instance.SetLighthouseTrack(index, val);
-                        RefreshMainPlaylist();
-                    });
-                }
-                else {
-                    // Toggle = enabled for playback.
-                    toggle.isOn = MusicPlayer.Instance.IsTrackEnabled(index);
-                    toggle.onValueChanged.AddListener(val =>
-                        MusicPlayer.Instance.SetTrackEnabled(index, val));
-                }
+                // Toggle = selected for the shared live playback queue.
+                toggle.SetIsOnWithoutNotify(
+                    MusicPlayer.Instance.IsLighthouseTrackEnabled(index));
+                toggle.onValueChanged.AddListener(val =>
+                    MusicPlayer.Instance.SetLighthouseTrackEnabled(index, val));
             }
 
             _trackEntries.Add(entryGO);
