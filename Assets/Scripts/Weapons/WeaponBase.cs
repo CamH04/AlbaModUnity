@@ -32,7 +32,7 @@ public abstract class WeaponBase : NetworkBehaviour {
     // hooks Unity's OnTransformParentChanged callback on every spawned
     // NetworkObject and THROWS ("Invalid parenting, NetworkObject moved under
     // a non-NetworkObject parent") if you parent it under a transform that
-    // doesn't itself have a NetworkObject component — which weaponHolder
+    // doesn't itself have a NetworkObject component ï¿½ which weaponHolder
     // (a hand/camera socket) never will. So real Unity parenting is off the
     // table here entirely; instead we just mirror the holder's world
     // position/rotation onto the weapon each frame, which achieves the same
@@ -44,7 +44,7 @@ public abstract class WeaponBase : NetworkBehaviour {
 
         // We delay by one frame because WeaponSpawner spawns this weapon
         // from INSIDE the player object's own OnNetworkSpawn, which itself
-        // runs INSIDE NetworkObject.SpawnAsPlayerObject — i.e. we are nested
+        // runs INSIDE NetworkObject.SpawnAsPlayerObject ï¿½ i.e. we are nested
         // in the same call stack as the player object's spawn. Netcode
         // hasn't finished registering "this object is client X's player
         // object" yet at that point, so looking it up immediately fails.
@@ -53,13 +53,13 @@ public abstract class WeaponBase : NetworkBehaviour {
 
         currentAmmo = maxAmmo;
         _playerController = GetComponentInParent<PlayerController>();
-        if (!IsOwner) enabled = false;
         ApplyGameMode();
 
         // NOTE: we no longer disable this behaviour for non-owners.
         // LateUpdate() below needs to keep running on every client so the
         // weapon visually follows the holder everywhere, not just for the
-        // owner. HandleInput() already guards on IsOwner itself.
+        // owner. HandleInput() already guards on IsOwner itself, and so do
+        // the per-weapon client RPCs.
     }
 
     System.Collections.IEnumerator ResolveFollowTargetDelayed() {
@@ -70,7 +70,7 @@ public abstract class WeaponBase : NetworkBehaviour {
 
     void ResolveFollowTarget() {
         // IMPORTANT: NetworkManager.ConnectedClients is only populated on the
-        // server/host — it's empty on pure clients. GetPlayerNetworkObject()
+        // server/host ï¿½ it's empty on pure clients. GetPlayerNetworkObject()
         // reads from the locally-known spawned objects list instead, so it
         // works identically on server, host, and clients.
         var playerObject = NetworkManager.Singleton != null
@@ -88,7 +88,7 @@ public abstract class WeaponBase : NetworkBehaviour {
         // solely on WeaponSpawner's SetCamera() call. That call only runs on
         // the server's own local instance (it's a plain method call, not an
         // RPC), so it silently never reaches a real remote client's copy of
-        // the weapon — it only appeared to work when testing as host, since
+        // the weapon ï¿½ it only appeared to work when testing as host, since
         // host runs server + client 0 in the same process.
         if (_playerCamera == null)
             _playerCamera = playerObject.GetComponentInChildren<Camera>(true);
@@ -113,14 +113,14 @@ public abstract class WeaponBase : NetworkBehaviour {
 
     protected virtual void LateUpdate() {
         // Runs for every client (owner and non-owners) so everyone sees the
-        // weapon tracking the holder. Plain world-space copy — cheap, and
+        // weapon tracking the holder. Plain world-space copy ï¿½ cheap, and
         // safe since we removed NetworkTransform from the weapon prefab.
         if (_followTarget == null) return;
 
         transform.position = _followTarget.position;
 
         // Rotate with the CAMERA, not the holder. weaponHolder is typically
-        // a hand/body socket that only inherits yaw (turning left/right) —
+        // a hand/body socket that only inherits yaw (turning left/right) ï¿½
         // pitch (looking up/down) is applied separately to cameraHolder in
         // PlayerController.LateUpdate(). Using the camera's rotation here
         // means the weapon correctly follows full look direction, while
@@ -131,7 +131,7 @@ public abstract class WeaponBase : NetworkBehaviour {
             : _followTarget.rotation;
     }
 
-    // Add to WeaponBase — called after spawn and whenever mode changes
+    // Add to WeaponBase ï¿½ called after spawn and whenever mode changes
     public virtual void ApplyGameMode() {
         if (GameModeSettings.Instance == null) return;
         if (!GameModeSettings.Instance.IsTenXMode.Value) return;

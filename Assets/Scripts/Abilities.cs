@@ -114,6 +114,13 @@ public class Abilities : MonoBehaviour {
         if (_grappleCooldownTimer > 0f) _grappleCooldownTimer -= Time.deltaTime;
         if (_stimCooldownTimer > 0f) _stimCooldownTimer -= Time.deltaTime;
 
+        // The Chain Lash abduct takes over movement entirely. Drop any active
+        // swing grapple so the two systems can't fight over the controller.
+        if (motor != null && motor.IsAbducting) {
+            CancelGrappleForExternalForce();
+            return;
+        }
+
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
 
@@ -143,6 +150,7 @@ public class Abilities : MonoBehaviour {
 
     void FixedUpdate() {
         if (!IsLocalPlayer) return;
+        if (motor != null && motor.IsAbducting) return;
         if (_isGrappling)
             ApplyGrapple();
     }
@@ -151,6 +159,7 @@ public class Abilities : MonoBehaviour {
 
     void TryGrapple() {
         if (motor == null || cameraHolder == null) return;
+        if (motor.IsAbducting) return;
         if (_grappleCooldownTimer > 0f) return;
 
         Ray ray = new Ray(cameraHolder.position, cameraHolder.forward);
@@ -266,6 +275,19 @@ public class Abilities : MonoBehaviour {
 
         if (ropeRenderer != null)
             ropeRenderer.enabled = false;
+        LocalStatsTracker.Instance?.OnGrappleEnded();
+    }
+
+    /// <summary>
+    /// Cancels a swing grapple without launching the player. Used when another
+    /// system (the Chain Lash abduct) takes control of movement.
+    /// </summary>
+    public void CancelGrappleForExternalForce() {
+        if (!_isGrappling) return;
+        _isGrappling = false;
+
+        if (motor != null) motor.SetExternalControl(false);
+        if (ropeRenderer != null) ropeRenderer.enabled = false;
         LocalStatsTracker.Instance?.OnGrappleEnded();
     }
 

@@ -123,7 +123,7 @@ public class PlayerController : NetworkBehaviour {
 
         if (kb.spaceKey.wasPressedThisFrame) { _jumpPressed = true; _jumpHeld = true; }
         if (kb.spaceKey.wasReleasedThisFrame) _jumpHeld = false;
-        if (kb.leftCtrlKey.wasPressedThisFrame) OnSlidePressed();
+        if (kb.leftCtrlKey.wasPressedThisFrame && !_motor.IsAbducting) OnSlidePressed();
         if (kb.leftCtrlKey.wasReleasedThisFrame) OnSlideReleased();
 
         _yaw += _lookInput.x * mouseSensitivity;
@@ -137,6 +137,14 @@ public class PlayerController : NetworkBehaviour {
 
     void FixedUpdate() {
         if (!_isOwned) return;
+
+        // Chain Lash yank: the motor owns movement while it plays out.
+        if (_motor.IsAbducting) {
+            if (_slide.IsSliding) _slide.CancelSlide();
+            _jumpPressed = false;
+            _motor.AbductStep();
+            return;
+        }
 
         if (_motor.IsGrappling) {
             _motor.GrappleStep();

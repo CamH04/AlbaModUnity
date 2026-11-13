@@ -39,9 +39,21 @@ public class PlayerMotor : MonoBehaviour {
     private float _grappleSpeed;
     private float _grappleStopDistance;
 
+    // Forced, externally-driven movement (the AbductChain yank). While this is
+    // active normal input, gravity and the swing-grapple are all bypassed.
+    private bool _isAbducting;
+    private Vector3 _abductDestination;
+    private Vector3 _abductDirection = Vector3.forward;
+    private float _abductTimer;
+    private float _abductDuration;
+    private float _abductExitSpeed;
+    [Tooltip("Safety clamp on how far a single abduct step can move the controller.")]
+    public float abductMaxStep = 6f;
+
     public Vector3 Velocity => _velocity;
     public bool IsGrounded => _cc.isGrounded;
     public bool IsGrappling => _isGrappling;
+    public bool IsAbducting => _isAbducting;
 
     // When an external system (e.g. the Abilities swing-grapple) owns movement,
     // PlayerController must not apply normal input/gravity on top of it - that is
@@ -52,6 +64,14 @@ public class PlayerMotor : MonoBehaviour {
 
     void Awake() {
         _cc = GetComponent<CharacterController>();
+    }
+
+    void OnDisable() {
+        // Never leave the controller stuck in an external-movement state if the
+        // motor is disabled mid-abduct or mid-grapple (e.g. round reset).
+        _isAbducting = false;
+        _isGrappling = false;
+        _externalControl = false;
     }
 
     public void QueueJump() => _jumpQueued = true;
@@ -68,6 +88,7 @@ public class PlayerMotor : MonoBehaviour {
     }
 
     public void StartGrapple(Vector3 target, float speed, float stopDistance) {
+        _isAbducting = false;
         _grappleTarget = target;
         _grappleSpeed = speed;
         _grappleStopDistance = stopDistance;
@@ -114,7 +135,80 @@ public class PlayerMotor : MonoBehaviour {
         return true;
     }
 
+    // ── Abduct (Chain Lash) ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Forces this player to a destination over <paramref name="duration"/>.
+    /// Used by both halves of the Abduct yank: the target is dragged toward the
+    /// caster and the caster lunges toward the target.
+    /// </summary>
+    public void StartAbduct(Vector3 destination, float duration, float exitSpeed) {
+        _isAbducting = true;
+        _isGrappling = false;
+        _externalControl = false;
+
+        _abductDestination = destination;
+        _abductDuration = Mathf.Max(0.01f, duration);
+        _abductTimer = 0f;
+        _abductExitSpeed = Mathf.Max(0f, exitSpeed);
+
+        Vector3 toDest = destination - transform.position;
+        _abductDirection = toDest.sqrMagnitude > 0.0001f
+            ? toDest.normalized
+            : (orientation != null ? orientation.forward : transform.forward);
+
+        _velocity = Vector3.zero;
+        _jumpQueued = false;
+        _hasDoubleJump = false;
+    }
+
+    /// <summary>
+    /// Advances the abduct. Returns true while still travelling.
+    /// </summary>
+    public bool AbductStep() {
+        if (!_isAbducting) return false;
+
+        _abductTimer += Time.fixedDeltaTime;
+
+        Vector3 toDest = _abductDestination - transform.position;
+        float dist = toDest.magnitude;
+
+        if (dist <= 0.05f || _abductTimer >= _abductDuration) {
+            _isAbducting = false;
+
+            // The caster keeps a bit of forward momentum so the lunge flows
+            // straight back into normal movement instead of stopping dead.
+            if (_abductExitSpeed > 0f) {
+                _velocity = _abductDirection * _abductExitSpeed;
+                PreserveMomentum(0.35f);
+            }
+            else {
+                _velocity = Vector3.zero;
+            }
+            return false;
+        }
+
+        // Spread what's left over the time that's left so the move lands
+        // exactly on the destination instead of easing off short of it.
+        float remainingTime = Mathf.Max(0.01f, _abductDuration - _abductTimer);
+        float speed = dist / remainingTime;
+
+        Vector3 step = toDest / dist * Mathf.Min(speed * Time.fixedDeltaTime, dist);
+        if (step.magnitude > abductMaxStep)
+            step = step.normalized * abductMaxStep;
+
+        _velocity = step / Time.fixedDeltaTime;
+        _cc.Move(step);
+        return true;
+    }
+
     public void Move(Vector2 inputDir, bool jumpHeld) {
+        // While abducted, nothing else may drive the controller.
+        if (_isAbducting) {
+            AbductStep();
+            return;
+        }
+
         _jumpHeld = jumpHeld;
 
         Vector3 wishDir = orientation.right * inputDir.x + orientation.forward * inputDir.y;

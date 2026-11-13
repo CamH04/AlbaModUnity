@@ -5,6 +5,7 @@
 + Overhall netcode before playtest
 
 # To Add
++ cooldown indicator (for stim, grapple abilities and shain lash)
 + Make killfeed look and appear like terminal text 
 + Make some songs exclusive to lighthouse
 + Add dmg taken, dmg dealt, deaths to stats
@@ -26,8 +27,9 @@
 + + Nether blade 1 tap mealee(riftwalk on right click 2 sec cd) 
 
 + Maps
++ + Chapel yard feels way to open
 + + Penshaw monument map (with worm killbox) 
-+ + Forest Map with Fog of war, a collection of high up treehouses (decrpit, rotten)
++ + Forest Map with Fog of war (like silent holl fog), a collection of high up treehouses (decrpit, rotten)
 + + Aldershot Gallaries
 
 + Characters

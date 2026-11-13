@@ -73,7 +73,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  weaponName: Weapon
+  weaponName: Chain Lash
   fireRate: 2
   maxAmmo: 200000
   currentAmmo: 0
@@ -81,20 +81,21 @@ MonoBehaviour:
   muzzle: {fileID: 0}
   range: 50
   damage: 500
-  grappleSpeed: 45
-  grappleStopDistance: 0.75
-  castSpeed: 40
+  castSpeed: 55
   cooldown: 1
-  playerLayerMask:
-    serializedVersion: 2
-    m_Bits: 8
-  pullableLayerMask:
-    serializedVersion: 2
-    m_Bits: 64
+  abductSpeed: 65
+  casterTravelShare: 0.72
+  meetDistance: 1.8
+  minAbductDuration: 0.12
+  maxAbductDuration: 0.45
+  casterExitSpeed: 8
+  chainHitRadius: 0.3
   chainSegmentPrefab: {fileID: 1209785593948816094, guid: 0533f9c4cb1941e4693ae0e1952a6125, type: 3}
-  chainSegments: 12
+  segmentLength: 0.55
+  maxChainSegments: 96
   chainWidth: 0.06
   chainColor: {r: 0.5, g: 0.9, b: 1, a: 1}
+  retractSpeed: 70
   hookPrefab: {fileID: 0}
   impactEffectPrefab: {fileID: 0}
 --- !u!82 &6396903543677933311
